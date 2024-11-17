@@ -13,13 +13,16 @@
     "@emotion/react": "^11.13.3",
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.9.3",
+    "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.7",
     "mui-datatables": "^4.3.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@types/mui-datatables": "^4.3.12",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
