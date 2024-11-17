@@ -11,6 +11,7 @@ import { Dashboard } from "./views/Dashboard.tsx";
 import { NotFound } from "./views/NotFound.tsx";
 import Journal from "./views/Journal.tsx";
 import { NavBar } from "./components/nav/NavBar.tsx";
+import PlayBook from "./views/PlayBook.tsx";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -34,6 +35,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/journal" element={<Journal />} />
+          <Route path="/playbook" element={<PlayBook />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
