@@ -1,6 +1,16 @@
 import Avatar from "@mui/material/Avatar";
-import {IconButton} from "@mui/material";
-import {CircleChevronRight, CirclePlus, Trash2} from "lucide-react";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    MenuItem,
+    Select
+} from "@mui/material";
+import {ChevronsUpDown, CircleChevronRight, CirclePlus, Trash2} from "lucide-react";
 import React, {useEffect, useState} from "react";
 
 interface DetailsSectionProps {
@@ -8,6 +18,17 @@ interface DetailsSectionProps {
     data: Record<string, string>;
 }
 
+interface CurrencySelectProps {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+}
+
+interface CurrencyPairDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onAdd: (fromCurrency: string, toCurrency: string) => void;
+}
 
 const DetailsSection: React.FC<DetailsSectionProps> = ({title, data}) => (
     <div className="my-6">
@@ -36,7 +57,84 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({title, data}) => (
     </div>
 );
 
-export const UserSettingsView = () => {
+const currencies = [
+    {value: "usd", label: "USD"},
+    {value: "eur", label: "EUR"},
+    {value: "gbp", label: "GBP"},
+    {value: "jpy", label: "JPY"},
+    {value: "aud", label: "AUD"},
+];
+
+const CurrencyPairDialog: React.FC<CurrencyPairDialogProps> = ({open, onClose, onAdd}) => {
+    const [fromCurrency, setFromCurrency] = useState<string>("");
+    const [toCurrency, setToCurrency] = useState<string>("");
+
+    const handleAddCurrency = () => {
+        onAdd(fromCurrency, toCurrency);
+        onClose();
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogContent className="w-[400px]">
+                <DialogTitle>Add Currency Pair</DialogTitle>
+                <div className="py-4">
+                    <CurrencySelect
+                        label="From Currency"
+                        value={fromCurrency}
+                        onChange={setFromCurrency}
+                    />
+                    <div className="flex items-center justify-center my-2">
+                        <div className="rounded-full p-2">
+                            <ChevronsUpDown className="h-4 w-4"/>
+                        </div>
+                    </div>
+                    <CurrencySelect
+                        label="To Currency"
+                        value={toCurrency}
+                        onChange={setToCurrency}
+                    />
+                </div>
+                <DialogActions>
+                    <Button variant="outlined" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleAddCurrency} disabled={!fromCurrency || !toCurrency}>
+                        Add Pair
+                    </Button>
+                </DialogActions>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const CurrencySelect: React.FC<CurrencySelectProps> = ({label, value, onChange}) => {
+    return (
+        <FormControl fullWidth variant="outlined">
+            <Select
+                size="small"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                MenuProps={{PaperProps: {style: {maxHeight: 200}}}}
+                displayEmpty
+                renderValue={value ? undefined : () => `${label}`}
+                IconComponent={() => (
+                    <IconButton>
+                        <ChevronsUpDown className="h-4 w-4"/>
+                    </IconButton>
+                )}
+                variant="outlined">
+                {currencies.map((currency) => (
+                    <MenuItem key={currency.value} value={currency.value}>
+                        {currency.label}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+    );
+};
+
+export const UserSettingsView: React.FC = () => {
     const user = {
         displayName: "Kasun DK",
         fullName: "Kasun Dilshan",
@@ -53,9 +151,11 @@ export const UserSettingsView = () => {
         currency: "USD",
     };
 
-    const [currencyPairs, setCurrencyPairs] = useState(["USD/LKR", "EUR/USD", "GBP/JPY"]);
+    const [currencyPairs, setCurrencyPairs] = useState<string[]>(["USD/LKR", "EUR/USD", "GBP/JPY"]);
+    const [date, setDate] = useState<string>(new Date().toString());
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-    const [date, setDate] = useState(new Date().toString())
+
     useEffect(() => {
         const intervalId = setInterval(() => {
             setDate(new Date().toString());
@@ -63,17 +163,19 @@ export const UserSettingsView = () => {
         return () => clearInterval(intervalId);
     }, []);
 
-    const handleAddCurrency = () => {
-        const newCurrency = "USD/EUR";
-        if (!currencyPairs.includes(newCurrency)) {
-            setCurrencyPairs([...currencyPairs, newCurrency]);
+    const handleAddCurrency = (from: string, to: string) => {
+        const fromUppercase = from.trim().toUpperCase();
+        const toUppercase = to.trim().toUpperCase();
+
+        if (fromUppercase !== "" && toUppercase !== "" && !currencyPairs.includes(`${fromUppercase}/${toUppercase}`)) {
+            setCurrencyPairs([...currencyPairs, `${fromUppercase}/${toUppercase}`]);
+            setModalOpen(false);
         }
     };
 
     const handleDeleteCurrency = (pair: string) => {
         setCurrencyPairs(currencyPairs.filter((currency) => currency !== pair));
     };
-
 
     return (
         <div className="m-2 sm:grid-cols-1 lg:grid-cols-4 grid border rounded min-h-screen bg-gray-50/50">
@@ -83,32 +185,27 @@ export const UserSettingsView = () => {
                         <Avatar className="h-16 w-16 bg-blue-500">AB</Avatar>
                         <div>
                             <h1 className="text-xl font-semibold">{user.displayName}</h1>
-                            <p className="text-gray-600">
-                                {user.email}
-                            </p>
+                            <p className="text-gray-600">{user.email}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="mb-6 border rounded p-4">
-                    <h1 className=" text-sm font-semibold text-gray-500 ">Total Profit</h1>
+                    <h1 className="text-sm font-semibold text-gray-500">Total Profit</h1>
                     <h1 className="font-semibold text-2xl text-blue-600">12.395769 BTC</h1>
                     <p className="text-gray-600">{date}</p>
                 </div>
 
                 <div className="mb-6 border rounded p-4">
-                    {/* Header */}
                     <div className="flex justify-between items-center mb-2">
-                        <h1 className=" text-sm font-semibold text-gray-500 ">
-                            Currency Pairs
-                        </h1>
-                        <IconButton color="primary" aria-label="Add Currency Pair" onClick={handleAddCurrency}>
+                        <h1 className="text-sm font-semibold text-gray-500">Currency Pairs</h1>
+                        <IconButton color="primary" aria-label="Add Currency Pair" onClick={() => setModalOpen(true)}>
                             <CirclePlus/>
                         </IconButton>
                     </div>
 
-                    <div className="flex w-full  justify-between items-center">
-                        {<div className="space-y-2 w-full">
+                    <div className="flex w-full justify-between items-center">
+                        <div className="space-y-2 w-full">
                             {currencyPairs.map((pair, index) => (
                                 <div key={index}
                                      className="flex px-2 rounded bg-blue-50 w-full justify-between items-center">
@@ -123,7 +220,6 @@ export const UserSettingsView = () => {
                                 </div>
                             ))}
                         </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -131,14 +227,16 @@ export const UserSettingsView = () => {
             <div className="p-6 lg:px-8 lg:col-span-3">
                 <div className="max-w-3xl mb-6">
                     <h4 className="font-semibold text-xl">Personal Information</h4>
-                    <p className="text-gray-600">
-                        Basic info, like your name and address, that you use on Trade Mate Platform.
-                    </p>
+                    <DetailsSection title="General Information" data={user}/>
+                    <DetailsSection title="Preferences" data={preferences}/>
                 </div>
-
-                <DetailsSection title="Basics" data={user}/>
-                <DetailsSection title="Preferences" data={preferences}/>
             </div>
+
+            <CurrencyPairDialog
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onAdd={handleAddCurrency}
+            />
         </div>
     );
 };
