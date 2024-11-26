@@ -1,34 +1,44 @@
 import {DataTypes, Model} from "sequelize";
 import sequelize from "../config/db";
 
-class User extends Model {
+class CurrencyPair extends Model {
     public id!: number;
-    public username!: string;
-    public password!: string;
+    public from!: string;
+    public to!: string;
+    public userId!: number;
 }
 
-User.init(
+CurrencyPair.init(
     {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
-        username: {
+        from: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        password: {
+        to: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: "users",
+                key: "id",
+            },
         },
     },
     {
         sequelize,
-        modelName: "User",
-        tableName: "users",
+        modelName: "CurrencyPair",
+        tableName: "currency_pairs",
         timestamps: false,
     }
 );
 
-export default User;
+
+export default CurrencyPair;
