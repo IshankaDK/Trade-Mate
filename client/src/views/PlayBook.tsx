@@ -244,7 +244,7 @@ const PlayBook = () => {
             description: "Targets short-term Forex movements for aggressive traders.",
             marketType: "Forex",
             marketCondition: "Sideways",
-            riskLevel: "High Risk",
+            riskLevel: "High",
             timeFrame: "15 Minutes",
             backtestData: undefined,
             winRate: 55,
@@ -260,7 +260,7 @@ const PlayBook = () => {
             description: "Designed for traders seeking to exploit sideways Forex markets.",
             marketType: "Forex",
             marketCondition: "Sideways",
-            riskLevel: "High Risk",
+            riskLevel: "High",
             timeFrame: "30 Minutes",
             backtestData: undefined,
             winRate: 58,
@@ -268,7 +268,72 @@ const PlayBook = () => {
             lastModifiedDate: new Date(),
             userId: 126,
         },
+        {
+            id: "5",
+            name: "Crypto Trend Follower",
+            type: "Trend Following",
+            comment: "Targets trending markets with moderate risk",
+            description: "Tracks long-term trends in crypto markets, ideal for mid-term investors.",
+            marketType: "Crypto",
+            marketCondition: "Bullish/Bearish",
+            riskLevel: "Medium",
+            timeFrame: "4 Hours",
+            backtestData: undefined,
+            winRate: 65,
+            totalTrades: 100,
+            lastModifiedDate: new Date(),
+            userId: 127,
+        },
+        {
+            id: "6",
+            name: "Scalping Expert",
+            type: "Scalping",
+            comment: "Aggressive short-term strategy for professional scalpers",
+            description: "Focuses on small price movements with quick trades in Forex markets.",
+            marketType: "Forex",
+            marketCondition: "Bullish",
+            riskLevel: "High",
+            timeFrame: "5 Minutes",
+            backtestData: undefined,
+            winRate: 80,
+            totalTrades: 500,
+            lastModifiedDate: new Date(),
+            userId: 128,
+        },
+        {
+            id: "7",
+            name: "Long-Term Investor",
+            type: "Position Trading",
+            comment: "Low-frequency, long-term investment strategy",
+            description: "Focuses on holding assets for months or years to capture larger moves.",
+            marketType: "Stocks",
+            marketCondition: "Bullish/Bearish",
+            riskLevel: "Low",
+            timeFrame: "Daily",
+            backtestData: undefined,
+            winRate: 75,
+            totalTrades: 50,
+            lastModifiedDate: new Date(),
+            userId: 129,
+        },
+        {
+            id: "8",
+            name: "Range-Bound Forex",
+            type: "Range Trading",
+            comment: "Ideal for sideways market conditions",
+            description: "Profits from price fluctuations within a defined range in the Forex market.",
+            marketType: "Forex",
+            marketCondition: "Sideways",
+            riskLevel: "Medium",
+            timeFrame: "1 Hour",
+            backtestData: undefined,
+            winRate: 65,
+            totalTrades: 180,
+            lastModifiedDate: new Date(),
+            userId: 130,
+        },
     ];
+
 
     const [openModal, setOpenModal] = useState(false);
 
@@ -307,7 +372,7 @@ const PlayBook = () => {
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
                 <DialogTitle>Add New Strategy</DialogTitle>
                 <DialogContent>
-                    <StrategyForm/> {/* Your StrategyForm component here */}
+                    <StrategyForm/>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal} color="primary">
