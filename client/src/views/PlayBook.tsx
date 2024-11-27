@@ -1,208 +1,9 @@
-import {StrategyCard} from "../components/card/StrategyCard.tsx";
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
+import {Button, Dialog, DialogContent, DialogTitle} from "@mui/material";
 import React, {useState} from "react";
+import {StrategyCard} from "../components/card/StrategyCard.tsx";
+import {StrategyForm} from "../components/form/StrategyForm.tsx";
 
-const StrategyForm = () => {
-    const [formData, setFormData] = useState({
-        id: "",
-        name: "",
-        type: "",
-        comment: "",
-        description: "",
-        marketType: "",
-        marketCondition: "",
-        riskLevel: "",
-        timeFrame: "",
-        backtestData: "",
-        winRate: 0,
-        totalTrades: 0,
-        lastModifiedDate: new Date(),
-        userId: 1,
-    });
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const {name, value} = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("Strategy Submitted: ", formData);
-    };
-
-    return (
-        <div className="max-w-4xl mx-auto  p-4">
-            <form onSubmit={handleSubmit} className="space-y-2">
-                <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-600">Strategy Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="type" className="block text-sm font-medium text-gray-600">Type</label>
-                    <input
-                        type="text"
-                        id="type"
-                        name="type"
-                        value={formData.type}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="comment" className="block text-sm font-medium text-gray-600">Comment</label>
-                    <textarea
-                        id="comment"
-                        name="comment"
-                        value={formData.comment}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-600">Description</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="marketType" className="block text-sm font-medium text-gray-600">Market Type</label>
-                    <input
-                        type="text"
-                        id="marketType"
-                        name="marketType"
-                        value={formData.marketType}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="marketCondition" className="block text-sm font-medium text-gray-600">Market
-                        Condition</label>
-                    <input
-                        type="text"
-                        id="marketCondition"
-                        name="marketCondition"
-                        value={formData.marketCondition}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="riskLevel" className="block text-sm font-medium text-gray-600">Risk Level</label>
-                    <input
-                        type="text"
-                        id="riskLevel"
-                        name="riskLevel"
-                        value={formData.riskLevel}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="timeFrame" className="block text-sm font-medium text-gray-600">Time Frame</label>
-                    <input
-                        type="text"
-                        id="timeFrame"
-                        name="timeFrame"
-                        value={formData.timeFrame}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="backtestData" className="block text-sm font-medium text-gray-600">Backtest
-                        Data</label>
-                    <input
-                        type="text"
-                        id="backtestData"
-                        name="backtestData"
-                        value={formData.backtestData || ""}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="winRate" className="block text-sm font-medium text-gray-600">Win Rate</label>
-                    <input
-                        type="number"
-                        id="winRate"
-                        name="winRate"
-                        value={formData.winRate}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="totalTrades" className="block text-sm font-medium text-gray-600">Total
-                        Trades</label>
-                    <input
-                        type="number"
-                        id="totalTrades"
-                        name="totalTrades"
-                        value={formData.totalTrades}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="userId" className="block text-sm font-medium text-gray-600">User ID</label>
-                    <input
-                        type="number"
-                        id="userId"
-                        name="userId"
-                        value={formData.userId}
-                        onChange={handleChange}
-                        className="mt-1 px-3 py-2 border rounded-md w-full"
-                        required
-                    />
-                </div>
-
-                <div className="mt-4">
-                    <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600">
-                        Submit Strategy
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-const PlayBook = () => {
+const PlayBook: React.FC = () => {
     const strategies = [
         {
             id: "1",
@@ -219,6 +20,8 @@ const PlayBook = () => {
             totalTrades: 150,
             lastModifiedDate: new Date(),
             userId: 123,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "2",
@@ -235,6 +38,8 @@ const PlayBook = () => {
             totalTrades: 320,
             lastModifiedDate: new Date(),
             userId: 124,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "3",
@@ -251,6 +56,8 @@ const PlayBook = () => {
             totalTrades: 200,
             lastModifiedDate: new Date(),
             userId: 125,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "4",
@@ -267,6 +74,8 @@ const PlayBook = () => {
             totalTrades: 250,
             lastModifiedDate: new Date(),
             userId: 126,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "5",
@@ -283,6 +92,8 @@ const PlayBook = () => {
             totalTrades: 100,
             lastModifiedDate: new Date(),
             userId: 127,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "6",
@@ -299,6 +110,8 @@ const PlayBook = () => {
             totalTrades: 500,
             lastModifiedDate: new Date(),
             userId: 128,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "7",
@@ -315,6 +128,8 @@ const PlayBook = () => {
             totalTrades: 50,
             lastModifiedDate: new Date(),
             userId: 129,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
         {
             id: "8",
@@ -331,18 +146,15 @@ const PlayBook = () => {
             totalTrades: 180,
             lastModifiedDate: new Date(),
             userId: 130,
+            timeFrameStart: null,
+            timeFrameEnd: null
         },
     ];
 
-
     const [openModal, setOpenModal] = useState(false);
 
-    const handleOpenModal = () => {
-        setOpenModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setOpenModal(false);
+    const handleModal = (flag: boolean) => {
+        setOpenModal(flag);
     };
 
     return (
@@ -356,33 +168,26 @@ const PlayBook = () => {
                     </p>
                 </div>
 
-                <Button variant="contained" onClick={handleOpenModal}>
-                    New Strategy
-                </Button>
+                <Button variant="contained" onClick={() => {
+                    handleModal(true)
+                }}>New Strategy</Button>
             </div>
 
             {/* Strategies Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[2vw] py-2">
-                {strategies.map((strategy) => (
-                    <StrategyCard key={strategy.id} {...strategy} />
-                ))}
+                {strategies.map((strategy) => (<StrategyCard key={strategy.id} {...strategy}/>))}
             </div>
 
             {/* Modal for adding new strategy */}
-            <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+            <Dialog open={openModal} onClose={() => {
+                handleModal(false)
+            }} maxWidth="sm" fullWidth>
                 <DialogTitle>Add New Strategy</DialogTitle>
                 <DialogContent>
                     <StrategyForm/>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseModal} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleCloseModal} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
             </Dialog>
+
         </div>
     );
 };
