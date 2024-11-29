@@ -1,16 +1,16 @@
 import * as dayjs from "dayjs";
-import React, {useState} from "react";
-import {Box, Button, FormControl, Grid, InputLabel, Select, TextField} from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
-import {LocalizationProvider, MobileDateTimePicker} from "@mui/x-date-pickers";
+import React, {useEffect, useState} from "react";
+import {Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField,} from "@mui/material";
+import {LocalizationProvider, MobileDateTimePicker,} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {StrategyProps} from "../../types/StrategyProps";
 
-export const StrategyForm = () => {
+export interface StrategyFormProp {
+    strategy: StrategyProps | null;
+}
 
-    const [formData, setFormData] = useState<StrategyProps>({
-        lastModifiedDate: new Date(),
-        totalTrades: 0,
+export const StrategyForm: React.FC<StrategyFormProp> = ({strategy}) => {
+    const defaultStrategy: StrategyProps = {
         id: "",
         name: "",
         type: "",
@@ -18,41 +18,37 @@ export const StrategyForm = () => {
         description: "",
         marketType: "",
         marketCondition: "",
-        riskLevel: "Medium",
+        riskLevel: "",
         timeFrame: "",
         backtestData: "",
         winRate: 0,
+        totalTrades: 0,
+        lastModifiedDate: new Date(),
         userId: 0,
         timeFrameStart: null,
-        timeFrameEnd: null
-    });
-
-    const handleChange = (e: any) => {
-        const {name, value} = e.target;
-        if (name) {
-            setFormData({
-                ...formData, [name]: value,
-            });
-        }
+        timeFrameEnd: null,
     };
 
-    const handleTimeFrameStartChange = (newValue: dayjs.Dayjs | null) => {
-        setFormData({
-            ...formData, timeFrameStart: newValue,
-        });
-    };
-
-    const handleTimeFrameEndChange = (newValue: dayjs.Dayjs | null) => {
-        setFormData({
-            ...formData, timeFrameEnd: newValue,
-        });
-    };
-
-
+    const [formData, setFormData] = useState<StrategyProps>(strategy || defaultStrategy);
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(formData)
+        console.table(formData)
+        console.log(strategy && strategy.id != null ? "Update " + strategy.id : "Save");
     };
+
+    useEffect(() => {
+        setFormData(strategy || defaultStrategy);
+    }, [strategy]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | {
+        name?: string; value: unknown
+    }>) => {
+        const {name, value} = e.target as HTMLInputElement;
+        setFormData((prev) => ({
+            ...prev, [name]: value,
+        }));
+    };
+
 
     return (<Box className="max-w-4xl mx-auto p-4" sx={{maxWidth: "600px"}}>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,6 +71,7 @@ export const StrategyForm = () => {
                     <Select
                         name="type"
                         value={formData.type}
+                        //@ts-ignore
                         onChange={handleChange}
                         variant="outlined"
                     >
@@ -116,15 +113,15 @@ export const StrategyForm = () => {
                     required
                 />
             </Box>
-
             <Box sx={{marginBottom: 2}}>
                 <FormControl fullWidth size="small" required>
                     <InputLabel>Market Type</InputLabel>
                     <Select
                         name="marketType"
                         value={formData.marketType}
-                        variant="outlined"
+                        //@ts-ignore
                         onChange={handleChange}
+                        variant="outlined"
                     >
                         <MenuItem value="Stocks">Stocks</MenuItem>
                         <MenuItem value="Crypto">Crypto</MenuItem>
@@ -141,6 +138,7 @@ export const StrategyForm = () => {
                         name="marketCondition"
                         value={formData.marketCondition}
                         variant="outlined"
+                        //@ts-ignore
                         onChange={handleChange}
                     >
                         <MenuItem value="Bullish">Bullish</MenuItem>
@@ -158,6 +156,7 @@ export const StrategyForm = () => {
                         name="riskLevel"
                         value={formData.riskLevel}
                         variant="outlined"
+                        //@ts-ignore
                         onChange={handleChange}
                     >
                         <MenuItem value="Low">Low</MenuItem>
@@ -210,8 +209,7 @@ export const StrategyForm = () => {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <MobileDateTimePicker
                             label="Start Time"
-                            value={formData.timeFrameStart}
-                            onChange={handleTimeFrameStartChange}
+                            value={formData.timeFrameStart ? dayjs(formData.timeFrameStart) : null}
                         />
                     </LocalizationProvider>
                 </Grid>
@@ -219,21 +217,14 @@ export const StrategyForm = () => {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <MobileDateTimePicker
                             label="End Time"
-                            value={formData.timeFrameEnd}
-                            onChange={handleTimeFrameEndChange}
+                            value={formData.timeFrameEnd ? dayjs(formData.timeFrameEnd) : null}
                         />
                     </LocalizationProvider>
                 </Grid>
             </Grid>
-
             <Box>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                >
-                    Save
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                    {strategy && strategy.id ? "Update" : "Save"}
                 </Button>
             </Box>
         </form>
