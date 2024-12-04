@@ -1,11 +1,11 @@
 import {Button, Dialog, DialogContent, DialogTitle} from "@mui/material";
 import React, {useState} from "react";
-import {StrategyCard} from "../components/card/StrategyCard.tsx";
-import {StrategyForm} from "../components/form/StrategyForm.tsx";
-import {StrategyProps} from "../types/StrategyProps.ts";
+import {StrategyCard} from "../../../components/card/StrategyCard.tsx";
+import {StrategyForm} from "../../../components/form/StrategyForm.tsx";
+import {StrategyProps} from "../../../types/StrategyProps.ts";
 import {Plus} from "lucide-react";
 
-const PlayBook: React.FC = () => {
+export const ManageStrategyView: React.FC = () => {
 
     const [strategies] = useState<StrategyProps[]>([{
         id: "1",
@@ -198,4 +198,3 @@ const PlayBook: React.FC = () => {
     </div>);
 };
 
-export default PlayBook;

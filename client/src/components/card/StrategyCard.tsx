@@ -1,5 +1,6 @@
 import {CalendarIcon, Pencil, Trash, UserIcon} from "lucide-react";
 import {StrategyProps} from "../../types/StrategyProps.ts";
+import React from "react";
 
 interface StrategyCardProps {
     strategy: StrategyProps;
