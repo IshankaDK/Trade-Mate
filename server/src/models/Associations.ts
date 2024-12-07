@@ -17,7 +17,7 @@ export const configAssociations = () => {
 
     User.hasMany(Playbook, {
         foreignKey: "userId",
-        as: "playbooks"
+        as: "playbooks",
     })
 
     Playbook.belongsTo(User, {

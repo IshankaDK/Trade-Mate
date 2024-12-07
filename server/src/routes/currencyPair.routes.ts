@@ -1,4 +1,4 @@
-import {Router} from "express";
+import { Router } from "express";
 import {
     deleteCurrencyPairById,
     getCurrencyPairsById,
@@ -9,9 +9,8 @@ import {
 const router = Router();
 
 router.post("", saveCurrencyPair);
+router.get("/user/currency-pairs", getCurrencyPairsByUser);
 router.get("/:id", getCurrencyPairsById);
-router.get("/user/:userId", getCurrencyPairsByUser);
 router.delete("/:id", deleteCurrencyPairById);
 
 export default router;
-
