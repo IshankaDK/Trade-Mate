@@ -8,7 +8,6 @@ export const saveCurrencyPair = async (
   req: Request,
   res: Response<StandardResponse<CurrencyPair>>
 ) => {
-  console.log("Saving currency pair...");
   try {
     const { from, to } = req.body;
     const userId = req.body.user.id;
