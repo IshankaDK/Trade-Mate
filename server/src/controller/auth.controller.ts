@@ -5,9 +5,9 @@ import jwt from "jsonwebtoken";
 
 
 export const login = async (req: Request, res: Response) => {
-    const {username, password} = req.body;
+    const {email: email, password} = req.body;
 
-    if (!username || !password) {
+    if (!email || !password) {
         return res.status(400).json({
             data: null,
             message: "Username and password are required",
@@ -16,7 +16,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     try {
-        const user = await User.findOne({where: {username}});
+        const user = await User.findOne({where: {username: email}});
 
         if (!user) {
             return res.status(404).json({
@@ -41,7 +41,7 @@ export const login = async (req: Request, res: Response) => {
         res.status(200).json({
             data: {
                 id: user.id,
-                username: user.username,
+                username: user.email,
                 token,
             },
             message: "User logged in successfully",
@@ -58,34 +58,36 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const register = async (req: Request, res: Response) => {
-    const {username, password} = req.body;
 
-    if (!username || !password) {
+    console.log("Auth Controller: Register")
+    const {email: email, password} = req.body;
+    console.log(req.body)
+    if (!email || !password) {
         return res.status(400).json({
             data: null,
-            message: "Username and password are required",
+            message: "Email and password are required",
             status: 400,
         });
     }
 
     try {
-        const existingUser = await User.findOne({where: {username}});
+        const existingUser = await User.findOne({where: {email: email}});
         if (existingUser) {
             return res.status(400).json({
                 data: null,
-                message: "Username already taken",
+                message: "Email already taken",
                 status: 400,
             });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({username, password: hashedPassword});
+        const user = await User.create({email: email, password: hashedPassword});
 
         res.status(201).json({
             data: {
                 id: user.id,
-                username: user.username,
+                email: user.email,
             },
             message: "User created successfully",
             status: 201,
