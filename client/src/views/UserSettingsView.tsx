@@ -1,29 +1,12 @@
 import Avatar from "@mui/material/Avatar";
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    IconButton,
-    MenuItem,
-    Select
-} from "@mui/material";
-import {ChevronsUpDown, CircleChevronRight, CirclePlus, Trash2} from "lucide-react";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField} from "@mui/material";
+import {CircleChevronRight, CirclePlus, Slash, Trash2} from "lucide-react";
 import React, {useEffect, useState} from "react";
 
 interface DetailsSectionProps {
     title: string;
     data: Record<string, string>;
 }
-
-interface CurrencySelectProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-}
-
 interface CurrencyPairDialogProps {
     open: boolean;
     onClose: () => void;
@@ -57,42 +40,36 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({title, data}) => (
     </div>
 );
 
-const currencies = [
-    {value: "usd", label: "USD"},
-    {value: "eur", label: "EUR"},
-    {value: "gbp", label: "GBP"},
-    {value: "jpy", label: "JPY"},
-    {value: "aud", label: "AUD"},
-];
 
 const CurrencyPairDialog: React.FC<CurrencyPairDialogProps> = ({open, onClose, onAdd}) => {
-    const [fromCurrency, setFromCurrency] = useState<string>("");
-    const [toCurrency, setToCurrency] = useState<string>("");
+    const [fromCurrency, setFromCurrency] = useState<string>("USD");
+    const [toCurrency, setToCurrency] = useState<string>("LKR");
 
     const handleAddCurrency = () => {
         onAdd(fromCurrency, toCurrency);
         onClose();
     };
 
+
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogContent className="w-[400px]">
                 <DialogTitle>Add Currency Pair</DialogTitle>
-                <div className="py-4">
-                    <CurrencySelect
+                <div className="py-4 flex flex-row">
+                    <TextField
                         label="From Currency"
                         value={fromCurrency}
-                        onChange={setFromCurrency}
+                        onChange={(e) => setFromCurrency(e.target.value)}
                     />
                     <div className="flex items-center justify-center my-2">
                         <div className="rounded-full p-2">
-                            <ChevronsUpDown className="h-4 w-4"/>
+                            <Slash size={32} className="h-4 w-4"/>
                         </div>
                     </div>
-                    <CurrencySelect
+                    <TextField
                         label="To Currency"
                         value={toCurrency}
-                        onChange={setToCurrency}
+                        onChange={(e) => setToCurrency(e.target.value)}
                     />
                 </div>
                 <DialogActions>
@@ -105,32 +82,6 @@ const CurrencyPairDialog: React.FC<CurrencyPairDialogProps> = ({open, onClose, o
                 </DialogActions>
             </DialogContent>
         </Dialog>
-    );
-};
-
-const CurrencySelect: React.FC<CurrencySelectProps> = ({label, value, onChange}) => {
-    return (
-        <FormControl fullWidth variant="outlined">
-            <Select
-                size="small"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                MenuProps={{PaperProps: {style: {maxHeight: 200}}}}
-                displayEmpty
-                renderValue={value ? undefined : () => `${label}`}
-                IconComponent={() => (
-                    <IconButton>
-                        <ChevronsUpDown className="h-4 w-4"/>
-                    </IconButton>
-                )}
-                variant="outlined">
-                {currencies.map((currency) => (
-                    <MenuItem key={currency.value} value={currency.value}>
-                        {currency.label}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
     );
 };
 
