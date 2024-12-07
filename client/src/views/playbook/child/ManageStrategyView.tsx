@@ -2,12 +2,12 @@ import {Button, Dialog, DialogContent, DialogTitle} from "@mui/material";
 import React, {useState} from "react";
 import {StrategyCard} from "../../../components/card/StrategyCard.tsx";
 import {StrategyForm} from "../../../components/form/StrategyForm.tsx";
-import {StrategyProps} from "../../../types/StrategyProps.ts";
+import {StrategyDto} from "../../../types/StrategyDto.ts";
 import {Plus} from "lucide-react";
 
 export const ManageStrategyView: React.FC = () => {
 
-    const [strategies] = useState<StrategyProps[]>([{
+    const [strategies] = useState<StrategyDto[]>([{
         id: "1",
         name: "Starter",
         type: "Scalping",
@@ -144,15 +144,15 @@ export const ManageStrategyView: React.FC = () => {
         timeFrameStart: null,
         timeFrameEnd: null
     },]);
-    const [selectedStrategy, setSelectedStrategy] = useState<StrategyProps | null>(null);
+    const [selectedStrategy, setSelectedStrategy] = useState<StrategyDto | null>(null);
     const [openModal, setOpenModal] = useState(false);
 
-    const handleEdit = (strategy: StrategyProps) => {
+    const handleEdit = (strategy: StrategyDto) => {
         setSelectedStrategy(strategy);
         setOpenModal(true);
     };
 
-    const handleModal = (flag: boolean, strategy?: StrategyProps) => {
+    const handleModal = (flag: boolean, strategy?: StrategyDto) => {
         setOpenModal(flag);
         setSelectedStrategy(strategy || null);
     };

@@ -43,8 +43,6 @@ export const Login = () => {
   };
 
   const login = async () => {
-    console.log("Logging in...");
-    console.log({ email, password });
 
     if (!validateForm()) {
       toast.error(error || "Please fill out all required fields.");

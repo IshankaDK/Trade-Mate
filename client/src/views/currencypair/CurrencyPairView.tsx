@@ -9,11 +9,11 @@ import {
 } from "@mui/material";
 import { CirclePlus, Slash, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CurrencyPairDialogProps } from "../../types/CurrencyPairDialogProps";
+import { DialogProps } from "../../types/DialogProps.ts";
 import APIClient from "../../util/APIClient";
 import { toast } from "react-toastify";
 
-const CurrencyPairDialog: React.FC<CurrencyPairDialogProps> = ({
+const CurrencyPairDialog: React.FC<DialogProps> = ({
   open,
   onClose,
   refresh,
@@ -108,13 +108,10 @@ export const CurrencyPairView: React.FC = () => {
       },
     })
       .then((response) => {
-        toast.success("Currency pairs fetched successfully.");
-        console.log(response.data.data);
         setCurrencyPairs(response.data.data);
       })
       .catch((error) => {
-        console.error("Error fetching currency pairs:", error);
-        toast.error("Error fetching currency pairs.");
+        toast.error(error.message||"Error fetching currency pairs.");
       });
   };
 
@@ -136,7 +133,7 @@ export const CurrencyPairView: React.FC = () => {
         }
       })
       .catch((error) => {
-        console.error("Error deleting currency pair:", error);
+        console.log(error)
         toast.error("Error deleting currency pair.");
       });
   };
@@ -153,27 +150,30 @@ export const CurrencyPairView: React.FC = () => {
           <CirclePlus />
         </IconButton>
       </div>
-      {currencyPairs.length === 0 ? (
-        <div>No currency pairs found.</div>
-      ) : (
-        currencyPairs.map((pair) => (
-          <div
-            key={pair.id}
-            className="flex px-2 rounded bg-blue-50 w-full justify-between items-center"
-          >
-            <h1 className="text-gray-600 font-semibold">
-              {pair.from} / {pair.to}
-            </h1>
-            <IconButton
-              color="error"
-              aria-label="Delete Currency Pair"
-              onClick={() => handleDeleteCurrencyPair(pair.id)}
+
+      <div className="space-y-2 max-h-60 overflow-y-auto">
+        {currencyPairs.length === 0 ? (
+          <div>No currency pairs found.</div>
+        ) : (
+          currencyPairs.map((pair) => (
+            <div
+              key={pair.id}
+              className="flex px-2 rounded bg-blue-50 w-full justify-between items-center"
             >
-              <Trash2 size="20" color="grey" />
-            </IconButton>
-          </div>
-        ))
-      )}
+              <h1 className="text-gray-600 font-semibold">
+                {pair.from} / {pair.to}
+              </h1>
+              <IconButton
+                color="error"
+                aria-label="Delete Currency Pair"
+                onClick={() => handleDeleteCurrencyPair(pair.id)}
+              >
+                <Trash2 size="20" color="grey" />
+              </IconButton>
+            </div>
+          ))
+        )}
+      </div>
 
       <CurrencyPairDialog
         open={modalOpen}

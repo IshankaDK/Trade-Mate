@@ -3,14 +3,14 @@ import React, {useEffect, useState} from "react";
 import {Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField,} from "@mui/material";
 import {LocalizationProvider, MobileDateTimePicker,} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {StrategyProps} from "../../types/StrategyProps";
+import {StrategyDto} from "../../types/StrategyDto.ts";
 
 export interface StrategyFormProp {
-    strategy: StrategyProps | null;
+    strategy: StrategyDto | null;
 }
 
 export const StrategyForm: React.FC<StrategyFormProp> = ({strategy}) => {
-    const defaultStrategy: StrategyProps = {
+    const defaultStrategy: StrategyDto = {
         id: "",
         name: "",
         type: "",
@@ -29,7 +29,7 @@ export const StrategyForm: React.FC<StrategyFormProp> = ({strategy}) => {
         timeFrameEnd: null,
     };
 
-    const [formData, setFormData] = useState<StrategyProps>(strategy || defaultStrategy);
+    const [formData, setFormData] = useState<StrategyDto>(strategy || defaultStrategy);
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.table(formData)

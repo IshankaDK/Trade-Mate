@@ -1,10 +1,10 @@
 import {CalendarIcon, Info, Pencil, Trash} from "lucide-react";
-import {StrategyProps} from "../../types/StrategyProps.ts";
+import {StrategyDto} from "../../types/StrategyDto.ts";
 import React from "react";
 
 interface StrategyCardProps {
-    strategy: StrategyProps;
-    onEdit: (strategy: StrategyProps) => void;
+    strategy: StrategyDto;
+    onEdit: (strategy: StrategyDto) => void;
 }
 
 export const StrategyCard: React.FC<StrategyCardProps> = ({strategy, onEdit}) => {
