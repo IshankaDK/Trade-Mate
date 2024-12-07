@@ -7,7 +7,7 @@ console.log("Prefix  :", prefix);
 import axios from "axios";
 
 const APIClient = axios.create({
-    baseURL: baseURL,
+    baseURL: baseURL + prefix,
 });
 
 export default APIClient;

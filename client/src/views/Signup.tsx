@@ -67,7 +67,7 @@ export const Signup = () => {
 
     try {
       const response = await APIClient.post(
-        "/api/auth/register",
+        "/auth/register",
         registrationData
       );
       if (response.status === 201) {

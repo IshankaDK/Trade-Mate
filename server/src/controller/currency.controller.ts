@@ -8,10 +8,13 @@ export const saveCurrencyPair = async (
   req: Request,
   res: Response<StandardResponse<CurrencyPair>>
 ) => {
+  console.log("Saving currency pair...");
   try {
-    const { userId, from, to } = req.body;
+    const { from, to } = req.body;
+    const userId = req.body.user.id;
 
-    if (!userId || !from || !to) {
+
+    if (!from || !to) {
       return res.status(400).json({
         success: false,
         message: "All fields are required: userId, from, to.",

@@ -54,11 +54,11 @@ export const Login = () => {
     const loginData = { email, password };
 
     try {
-      const response = await APIClient.post("/api/auth/login", loginData);
+      const response = await APIClient.post("/auth/login", loginData);
       console.log("Login Successful:", response.data.data.token);
       const { data, message } = response.data;
       toast.success(message || "Login successful!");
-      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("token", data.token);
 
       resetFormData();
       navigate("/dashboard");
