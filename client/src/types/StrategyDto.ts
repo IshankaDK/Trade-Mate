@@ -1,7 +1,5 @@
-import * as dayjs from "dayjs";
-
 export interface StrategyDto {
-  id: string;
+  id: number;
   name: string;
   type: string;
   comment?: string;
@@ -9,12 +7,8 @@ export interface StrategyDto {
   marketType: string;
   marketCondition: string;
   riskLevel: string;
-  timeFrame: string;
-  backtestData?: string;
   winRate: number;
   totalTrades: number;
   lastModifiedDate: Date;
   userId: number;
-  timeFrameStart: dayjs.Dayjs | null;
-  timeFrameEnd: dayjs.Dayjs | null;
 }

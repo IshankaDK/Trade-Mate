@@ -1,6 +1,6 @@
 import CurrencyPair from "./CurrencyPair";
 import User from "./User";
-import Playbook from "./PlayBook";
+import Strategy from "./Strategy";
 
 export const configAssociations = () => {
 
@@ -15,12 +15,12 @@ export const configAssociations = () => {
     });
 
 
-    User.hasMany(Playbook, {
+    User.hasMany(Strategy, {
         foreignKey: "userId",
-        as: "playbooks",
+        as: "strategies",
     })
 
-    Playbook.belongsTo(User, {
+    Strategy.belongsTo(User, {
         foreignKey: "userId",
         as: "user",
     });

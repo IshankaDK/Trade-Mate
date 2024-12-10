@@ -1,4 +1,4 @@
-import {DataTypes, Model} from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db";
 
 class Playbook extends Model {
@@ -11,7 +11,7 @@ class Playbook extends Model {
     public marketCondition!: "Bullish" | "Bearish" | "Volatile" | "Sideways";
     public riskLevel!: "Low" | "Medium" | "High Risk";
     public timeFrame!: string;
-    public backtestData?: string; // path or data for back testing screenshots
+    // public backtestData?: string; // path or data for back testing screenshots
     public winRate!: number;
     public totalTrades!: number;
     public lastModifiedDate!: Date;

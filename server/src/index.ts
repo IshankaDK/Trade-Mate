@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes";
 import currencyPairRoutes from "./routes/currencyPair.routes";
 import { authMiddleware } from "./middleware/authMiddleware";
 import userRoutes from "./routes/user.routes";
+import strategyRoutes from "./routes/strategy.routes";
 
 dotenv.config();
 
@@ -51,5 +52,6 @@ async function startServer() {
 app.use("/api/auth", authRoutes);
 app.use("/api/currencies", authMiddleware, currencyPairRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
+app.use("/api/strategies", strategyRoutes);
 
 startServer();

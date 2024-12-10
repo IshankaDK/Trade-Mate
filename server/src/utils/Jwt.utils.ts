@@ -5,6 +5,6 @@ export const getClaimsFromToken = (token: string): any => {
     console.log("Method getClaimsFromToken");
     return jwt.verify(token, process.env.JWT_SECRET as string);
   } catch (error) {
-    return null;
+    return error;
   }
 };
