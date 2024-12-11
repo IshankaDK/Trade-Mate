@@ -43,7 +43,6 @@ export const Login = () => {
   };
 
   const login = async () => {
-
     if (!validateForm()) {
       toast.error(error || "Please fill out all required fields.");
       return;

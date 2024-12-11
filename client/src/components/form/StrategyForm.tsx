@@ -18,7 +18,10 @@ export interface StrategyFormProp {
   loadAllStrategies: () => void;
 }
 
-export const StrategyForm: React.FC<StrategyFormProp> = ({ strategy, loadAllStrategies }) => {
+export const StrategyForm: React.FC<StrategyFormProp> = ({
+  strategy,
+  loadAllStrategies,
+}) => {
   // for testing purposes
   const defaultStrategy: StrategyDto = {
     id: 0,

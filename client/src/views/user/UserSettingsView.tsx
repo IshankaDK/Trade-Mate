@@ -10,11 +10,17 @@ import APIClient from "../../util/APIClient.ts";
 export const UserSettingsView: React.FC = () => {
   const [user, setUser] = useState<UserDto>({
     id: 0,
-    fullName: "N/A",
     email: "",
     mobile: "N/A",
     dateOfBirth: new Date(),
-    address: "N/A",
+    addressLine1: "N/A",
+    addressLine2: "N/A",
+    city: "N/A",
+    postalCode: "N/A",
+    country: "N/A",
+    firstName: "N/A",
+    lastName: "N/A",
+    gender: "N/A",
   });
   const [date, setDate] = useState<string>(new Date().toLocaleString());
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -28,6 +34,7 @@ export const UserSettingsView: React.FC = () => {
     })
       .then((response) => {
         const user: UserDto = response.data.data;
+        console.log(user);
         setUser(user);
       })
       .catch((error) => {
@@ -48,81 +55,126 @@ export const UserSettingsView: React.FC = () => {
   }, []);
 
   return (
-    <div className="m-2 sm:grid-cols-1 lg:grid-cols-4 grid border rounded bg-gray-50/50">
+    <div className="m-2 grid lg:grid-cols-4  rounded bg-gray-50/50">
       {/* Sidebar */}
-      <div className="w-full lg:w-[300px] border-b lg:border-b-0 bg-white p-6">
+      <aside className="w-full  sm:my-4 lg:w-[300px] border-b lg:border-b-0 bg-white p-6 shadow-lg">
+        {/* User Info */}
         <div className="flex items-center justify-between mb-6 border-b pb-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-16 w-16 bg-blue-500">AB</Avatar>
             <div>
-              <h1 className="text-xl font-semibold">{user?.fullName}</h1>
-              <p className="text-gray-600">{user?.email}</p>
+              {user && user.firstName && user.lastName ? (
+                <h1 className="text-lg font-semibold">
+                  {user.firstName} {user.lastName}
+                </h1>
+              ) : (
+                <h1 className="text-lg font-semibold">N/A</h1>
+              )}
+              <p className="text-gray-600 text-sm">{user?.email}</p>
             </div>
           </div>
         </div>
 
-        <div className="mb-6 border rounded p-4">
-          <h1 className="text-sm font-semibold text-gray-500">Total Profit</h1>
+        {/* Total Profit */}
+        <div className="mb-6 border rounded p-4 bg-gray-50 shadow-sm">
+          <h1 className="text-sm font-semibold text-gray-500 tracking-wide">
+            Total Profit
+          </h1>
           <h1 className="font-semibold text-2xl text-blue-600">
             12.395769 BTC
           </h1>
-          <p className="text-gray-600">{date}</p>
+          <p className="text-gray-600 text-sm">{date}</p>
         </div>
 
-        <div className="mb-6 border rounded p-4">
+        {/* Currency Pair View */}
+        <div className="mb-6 border rounded p-4 bg-gray-50 shadow-sm">
           <CurrencyPairView />
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="p-6 lg:px-8 lg:col-span-3">
-        <div className="max-w-5xl mb-6">
-          <div className="flex flex-row justify-between">
-            <h4 className="font-semibold text-xl">Personal Information</h4>
-            <div className="text-gray-600">
-              <IconButton color="primary" onClick={() => setModalOpen(true)}>
-                <Edit />
-              </IconButton>
-            </div>
-          </div>
+      <main className="p-6 sm:my-4 lg:px-8 lg:col-span-3 bg-white shadow-lg rounded">
+        {/* Personal Information */}
+        <section className="max-w-5xl mb-6">
+          <header className="flex justify-between items-center border-b pb-4 mb-4">
+            <h2 className="text-xl font-semibold  pb-2 tracking-wide">
+              User Personal Details
+            </h2>
+            <IconButton color="primary" onClick={() => setModalOpen(true)}>
+              <Edit />
+            </IconButton>
+          </header>
 
-          {/* User Information */}
-          <div className="mt-4 space-y-4">
-            {[
-              { label: "Full Name", value: user.fullName || "N/A" },
-              { label: "Email", value: user.email || "N/A" },
-              { label: "Mobile", value: user.mobile || "N/A" },
-              {
-                label: "Date of Birth",
-                value: user.dateOfBirth
-                  ? new Date(user.dateOfBirth).toLocaleDateString()
-                  : "N/A",
-              },
-              { label: "Address", value: user.address || "N/A" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-12 gap-4 items-center py-3 border-b"
-              >
-                <div className="col-span-4 text-sm font-medium capitalize text-gray-700">
-                  {item.label}
-                </div>
-                <div className="col-span-6 text-sm text-gray-900 break-words">
-                  {item.value}
-                </div>
+          <div className="">
+            {/* Personal Details */}
+            <section className="mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { label: "First Name", value: user.firstName },
+                  { label: "Last Name", value: user.lastName },
+                  {
+                    label: "Birthday",
+                    value: user.dateOfBirth?.toString().split("T")[0],
+                  },
+                  { label: "Gender", value: user.gender },
+                ].map((item, index) => (
+                  <div key={index}>
+                    <h3 className="text-lg font-semibold">{item.label}</h3>
+                    <p className="text-gray-700 text-sm">{item.value}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </section>
 
-      {/* Update User Modal */}
-      <UpdateUserForm
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        user={user}
-        refresh={loadUserDetails}
-      />
+            {/* Contact Details */}
+            <section className="mb-6">
+              <h2 className="text-xl font-semibold border-b pb-2 mb-4 tracking-wide">
+                Contact Details
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { label: "Email", value: user.email },
+                  { label: "Mobile", value: user.mobile },
+                ].map((item, index) => (
+                  <div key={index}>
+                    <h3 className="text-lg font-semibold">{item.label}</h3>
+                    <p className="text-gray-700 text-sm">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Address */}
+            <section className="mb-6">
+              <h2 className="text-xl font-semibold border-b pb-2 mb-4 tracking-wide">
+                Address
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { label: "Address Line 1", value: user.addressLine1 },
+                  { label: "Address Line 2", value: user.addressLine2 },
+                  { label: "City", value: user.city },
+                  { label: "Postal Code", value: user.postalCode },
+                  { label: "Country", value: user.country },
+                ].map((item, index) => (
+                  <div key={index}>
+                    <h3 className="text-lg font-semibold">{item.label}</h3>
+                    <p className="text-gray-700 text-sm">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </section>
+
+        {/* Update User Modal */}
+        <UpdateUserForm
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          user={user}
+          refresh={loadUserDetails}
+        />
+      </main>
     </div>
   );
 };

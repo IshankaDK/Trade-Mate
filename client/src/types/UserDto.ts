@@ -1,8 +1,14 @@
 export interface UserDto {
   id?: number;
   email: string;
-  fullName: string;
+  firstName?: string;
+  lastName?: string;
   mobile: string;
   dateOfBirth?: Date | null;
-  address: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  gender?: string;
 }

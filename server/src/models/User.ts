@@ -5,10 +5,16 @@ class User extends Model {
   public id!: number;
   public email!: string;
   public password!: string;
-  public fullName!: string;
+  public firstName!: string;
+  public lastName!: string;
   public mobile!: string;
   public dateOfBirth!: Date;
-  public address!: string;
+  public addressLine1!: string;
+  public addressLine2!: string;
+  public city!: string;
+  public postalCode!: string;
+  public country!: string;
+  public gender!: "MALE" | "FEMALE" | "OTHER";
 }
 
 User.init(
@@ -21,29 +27,64 @@ User.init(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,  // Ensure unique emails
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    fullName: {
+    firstName: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    fullName: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return `${this.firstName} ${this.lastName}`;
+      },
     },
     mobile: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     dateOfBirth: {
       type: DataTypes.DATE,
+      allowNull: true,
     },
-    address: {
+    addressLine1: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    addressLine2: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    postalCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+      allowNull: true,
     },
   },
   {
     sequelize,
     modelName: "User",
     tableName: "users",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

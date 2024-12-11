@@ -14,6 +14,8 @@ import { UserDto } from "../../types/UserDto";
 import APIClient from "../../util/APIClient";
 import { toast } from "react-toastify";
 import { UpdateUserFormProps } from "../../types/UpdateUserFormProps.ts";
+import Select from "react-select";
+import CountryList from "react-select-country-list";
 
 export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
   open,
@@ -23,22 +25,52 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<UserDto>(user);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [countryList, setCountryList] = useState<any>([]);
+  
+  const genderOptions = [
+    { value: "MALE", label: "Male" },
+    { value: "FEMALE", label: "Female" },
+    { value: "OTHER", label: "Other" },
+  ];
 
-  // Validation function
+  useEffect(() => {
+    setCountryList(CountryList().getData());
+  }, []);
+
   const validate = () => {
     const errors: { [key: string]: string } = {};
 
-    if (!formData.fullName) {
-      errors.fullName = "Full Name is required";
+    if (!formData.firstName) {
+      errors.firstName = "First Name is required";
+    }
+
+    if (!formData.lastName) {
+      errors.lastName = "Last Name is required";
+    }
+
+    if (!formData.mobile) {
+      errors.mobile = "Mobile number is required";
     }
 
     const phoneRegex = /^[0-9]{10}$/;
-    if (!formData.mobile || !phoneRegex.test(formData.mobile)) {
+    if (formData.mobile && !phoneRegex.test(formData.mobile)) {
       errors.mobile = "Please enter a valid 10-digit phone number";
     }
 
-    if (!formData.address) {
-      errors.address = "Address is required";
+    if (!formData.addressLine1) {
+      errors.addressLine1 = "Address Line 1 is required";
+    }
+
+    if (!formData.city) {
+      errors.city = "City is required";
+    }
+
+    if (!formData.postalCode) {
+      errors.postalCode = "Postal Code is required";
+    }
+
+    if (!formData.country) {
+      errors.country = "Country is required";
     }
 
     if (formData.dateOfBirth && !dayjs(formData.dateOfBirth).isValid()) {
@@ -57,10 +89,16 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
     }
 
     const formDataToSubmit = {
-      fullName: formData.fullName,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       mobile: formData.mobile,
       dateOfBirth: formData.dateOfBirth,
-      address: formData.address,
+      addressLine1: formData.addressLine1,
+      addressLine2: formData.addressLine2,
+      city: formData.city,
+      postalCode: formData.postalCode,
+      country: formData.country,
+      gender: formData.gender,
     };
 
     APIClient.patch("/users", formDataToSubmit, {
@@ -69,7 +107,6 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       },
     })
       .then(() => {
-        console.log("User details updated successfully.");
         toast.success("User details updated successfully.");
         refresh();
         onClose();
@@ -105,6 +142,29 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
     }));
   };
 
+  const handleCountryChange = (selectedOption: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      country: selectedOption ? selectedOption.value : "",
+    }));
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      country: "",
+    }));
+  };
+
+  const handleGenderChange = (selectedOption: any) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      gender: selectedOption ? selectedOption.value : "",
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      gender: "",
+    }));
+  };
+
   const handleClose = () => {
     setErrors({});
     onClose();
@@ -117,16 +177,30 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 min-w-[400px] mt-2">
           <Box sx={{ marginBottom: 2 }}>
             <TextField
-              label="Full Name"
+              label="First Name"
               size="small"
               type="text"
-              name="fullName"
-              value={formData.fullName}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
               fullWidth
               required
-              error={!!errors.fullName}
-              helperText={errors.fullName}
+              error={!!errors.firstName}
+              helperText={errors.firstName}
+            />
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="Last Name"
+              size="small"
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              fullWidth
+              required
+              error={!!errors.lastName}
+              helperText={errors.lastName}
             />
           </Box>
           <Box sx={{ marginBottom: 2 }}>
@@ -155,7 +229,6 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
                     ...prev,
                     dateOfBirth: newValue ? newValue.toDate() : null,
                   }));
-                  // Clear error when user selects date
                   setErrors((prevErrors) => ({
                     ...prevErrors,
                     dateOfBirth: "",
@@ -166,20 +239,83 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
           </Box>
           <Box sx={{ marginBottom: 2 }}>
             <TextField
-              label="Address"
+              label="Address Line 1"
               size="small"
               type="text"
-              name="address"
-              value={formData.address}
+              name="addressLine1"
+              value={formData.addressLine1}
               onChange={handleChange}
-              multiline
-              rows={4}
               fullWidth
               required
-              error={!!errors.address}
-              helperText={errors.address}
+              error={!!errors.addressLine1}
+              helperText={errors.addressLine1}
             />
           </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="Address Line 2"
+              size="small"
+              type="text"
+              name="addressLine2"
+              value={formData.addressLine2}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="City"
+              size="small"
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              fullWidth
+              required
+              error={!!errors.city}
+              helperText={errors.city}
+            />
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="Postal Code"
+              size="small"
+              type="text"
+              name="postalCode"
+              value={formData.postalCode}
+              onChange={handleChange}
+              fullWidth
+              required
+              error={!!errors.postalCode}
+              helperText={errors.postalCode}
+            />
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <Select
+              options={countryList}
+              value={countryList.find((c: any) => c.value === formData.country)}
+              onChange={handleCountryChange}
+              placeholder="Select Country"
+              isClearable
+            />
+            {errors.country && (
+              <div style={{ color: "red" }}>{errors.country}</div>
+            )}
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <Select
+              options={genderOptions}
+              value={genderOptions.find(
+                (option) => option.value === formData.gender
+              )}
+              onChange={handleGenderChange}
+              placeholder="Select Gender"
+            />
+            {errors.gender && (
+              <div style={{ color: "red" }}>{errors.gender}</div>
+            )}
+          </Box>
+
           <Box>
             <Button type="submit" variant="contained" color="primary" fullWidth>
               Update

@@ -1,6 +1,6 @@
-import {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import {BookOpen, LineChart, LogOut, Settings} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookOpen, LineChart, LogOut, Settings } from "lucide-react";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -20,6 +20,10 @@ export const NavBar = () => {
         setAnchorEl(null);
     };
 
+    const logout = () => {
+        localStorage.removeItem("token");
+    };
+
     return (
         <nav className="bg-white border-b w-full shadow-sm ">
             <div className=" mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-[4.5rem]">
@@ -34,21 +38,21 @@ export const NavBar = () => {
                         to="/dashboard"
                         className="flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-gray-200 hover:text-gray-800"
                     >
-                        <LineChart className="h-5 w-5"/>
+                        <LineChart className="h-5 w-5" />
                         <span>Dashboard</span>
                     </Link>
                     <Link
                         to="/journal"
                         className="flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-gray-200 hover:text-gray-800"
                     >
-                        <BookOpen className="h-5 w-5"/>
+                        <BookOpen className="h-5 w-5" />
                         <span>Journal</span>
                     </Link>
                     <Link
                         to="/playbook"
                         className="flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-gray-200 hover:text-gray-800"
                     >
-                        <Settings className="h-5 w-5"/>
+                        <Settings className="h-5 w-5" />
                         <span>Playbook</span>
                     </Link>
                 </div>
@@ -80,15 +84,16 @@ export const NavBar = () => {
                         >
                             Profile
                         </MenuItem>
-                        <Divider/>
+                        <Divider />
                         <MenuItem
                             onClick={() => {
                                 handleMenuClose();
+                                logout();
                                 navigate("/");
                             }}
                         >
                             <div className="flex items-center space-x-2">
-                                <LogOut className="h-4 w-4"/>
+                                <LogOut className="h-4 w-4" />
                                 <span>Logout</span>
                             </div>
                         </MenuItem>

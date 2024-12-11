@@ -22,9 +22,16 @@ export const getUserDetails = async (req: Request, res: Response) => {
         "id",
         "email",
         "fullName",
+        "firstName",
+        "lastName",
         "dateOfBirth",
         "mobile",
-        "address",
+        "addressLine1",
+        "addressLine2",
+        "city",
+        "postalCode",
+        "country",
+        "gender",
       ],
     });
 
@@ -55,7 +62,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
 export const updateUserDetails = async (req: Request, res: Response) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
-    
+
     const claims = getClaimsFromToken(token);
     if (!claims) {
       return res.status(401).json({
@@ -79,12 +86,29 @@ export const updateUserDetails = async (req: Request, res: Response) => {
       });
     }
 
-    const { fullName, dateOfBirth, mobile, address } = req.body;
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      mobile,
+      addressLine1,
+      addressLine2,
+      city,
+      postalCode,
+      country,
+      gender,
+    } = req.body;
 
-    user.fullName = fullName;
-    user.dateOfBirth = dateOfBirth;
-    user.mobile = mobile;
-    user.address = address;
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.dateOfBirth = dateOfBirth || user.dateOfBirth;
+    user.mobile = mobile || user.mobile;
+    user.addressLine1 = addressLine1 || user.addressLine1;
+    user.addressLine2 = addressLine2 || user.addressLine2;
+    user.city = city || user.city;
+    user.postalCode = postalCode || user.postalCode;
+    user.country = country || user.country;
+    user.gender = gender || user.gender;
 
     await user.save();
 
