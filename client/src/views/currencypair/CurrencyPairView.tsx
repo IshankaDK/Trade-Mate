@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { DialogProps } from "../../types/DialogProps.ts";
 import APIClient from "../../util/APIClient";
 import { toast } from "react-toastify";
+import { CurrencyDto } from "../../types/CurrencyDto.ts";
 
 const CurrencyPairDialog: React.FC<DialogProps> = ({
   open,
@@ -89,16 +90,10 @@ const CurrencyPairDialog: React.FC<DialogProps> = ({
   );
 };
 
-interface CurrencyPair {
-  id: number;
-  from: string;
-  to: string;
-  userId: number;
-}
 
 export const CurrencyPairView: React.FC = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [currencyPairs, setCurrencyPairs] = useState<CurrencyPair[]>([]);
+  const [currencyPairs, setCurrencyPairs] = useState<CurrencyDto[]>([]);
 
   // Load currency pairs
   const loadCurrencyPairs = () => {

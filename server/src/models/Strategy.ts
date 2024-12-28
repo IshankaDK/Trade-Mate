@@ -4,7 +4,7 @@ import sequelize from "../config/db";
 class Strategy extends Model {
   public id!: number; // Auto-incremented integer primary key
   public name!: string; // Name of the strategy
-  public type!: "Scalping" | "Swing Trading" | "Day Trading" | "Range Trading"; // Type of trading strategy
+  public type!: "Scalping" | "Swing Trading" | "Day Trading" | "Range Trading" | "Position Trading"; // Type of trading strategy
   public comment?: string; // Optional comment or note about the strategy
   public description!: string; // Detailed description of the strategy
   public marketType!: "Forex" | "Crypto" | "Stocks" | "Commodities" | "Other"; // Type of market this strategy targets
@@ -39,7 +39,8 @@ Strategy.init(
         "Scalping",
         "Swing Trading",
         "Day Trading",
-        "Range Trading"
+        "Range Trading",
+        "Position Trading"
       ),
       allowNull: false,
     },

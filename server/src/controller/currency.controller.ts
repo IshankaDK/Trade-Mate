@@ -12,7 +12,6 @@ export const saveCurrencyPair = async (
     const { from, to } = req.body;
     const userId = req.body.user.id;
 
-
     if (!from || !to) {
       return res.status(400).json({
         success: false,

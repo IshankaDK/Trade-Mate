@@ -8,11 +8,12 @@ import {
 import { Login } from "./views/Login.tsx";
 import { Signup } from "./views/Signup.tsx";
 import { NotFound } from "./views/NotFound.tsx";
-import Journal from "./views/Journal.tsx";
+import Journal from "./views/TradeJournalTable.tsx";
 import { NavBar } from "./components/nav/NavBar.tsx";
 import { UserSettingsView } from "./views/user/UserSettingsView.tsx";
 import { Dashboard } from "./views/Dashboard.tsx";
 import { PlaybookView } from "./views/playbook/PlaybookView.tsx";
+import JournalView from "./views/journal/JournalView.tsx";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -37,7 +38,7 @@ function App() {
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/journal" element={<Journal />} />
+          <Route path="/journal" element={<JournalView />} />
           <Route path="/playbook" element={<PlaybookView />} />
           <Route path="/settings" element={<UserSettingsView />} />
 

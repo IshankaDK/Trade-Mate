@@ -134,16 +134,17 @@ const data = [
     entryPrice: 1.2,
     exitPrice: 1.21,
     profit: 100,
-    status: "Win",
+    status: "Loss",
   },
 ];
 
-const Journal = () => {
+const TradeJournalTable = () => {
   return (
     <div>
       <MUIDataTable
-        title={""}
+        title={"Trading List"}
         data={data}
+
         columns={columns}
         options={{
           filterType: "dropdown",
@@ -161,19 +162,11 @@ const Journal = () => {
           customToolbar: () => (
             <>
               <Tooltip title="Refresh">
-                <IconButton onClick={() => {}}>
+                <IconButton onClick={() => { }}>
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-              <Button
-                data-cy={"add-new-job"}
-                variant="contained"
-                color="primary"
-                disableElevation
-                onClick={() => console.log("add new trade")}
-              >
-                + Add New Trade
-              </Button>
+
             </>
           ),
         }}
@@ -182,4 +175,4 @@ const Journal = () => {
   );
 };
 
-export default Journal;
+export default TradeJournalTable;

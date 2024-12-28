@@ -30,3 +30,4 @@ server/.env
 client/.env
 
 server/package-lock.json
+node_modules

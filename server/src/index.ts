@@ -9,6 +9,7 @@ import currencyPairRoutes from "./routes/currencyPair.routes";
 import { authMiddleware } from "./middleware/authMiddleware";
 import userRoutes from "./routes/user.routes";
 import strategyRoutes from "./routes/strategy.routes";
+import tradeRoutes from "./routes/trade.routes";
 
 dotenv.config();
 
@@ -53,5 +54,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/currencies", authMiddleware, currencyPairRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
 app.use("/api/strategies", strategyRoutes);
+app.use("/api/trades", tradeRoutes);
 
 startServer();

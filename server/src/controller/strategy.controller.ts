@@ -10,11 +10,14 @@ export const createStrategy = async (
   res: Response<StandardResponse<Strategy>>
 ) => {
   try {
+    console.log("Method createStrategy called");
     const strategyData = req.body;
+    console.log(strategyData);
     strategyData.userId = getClaimsFromToken(
       req.headers.authorization?.split(" ")[1] || ""
     ).id;
 
+    // Validate that all required fields are provided
     const existingStrategy = await Strategy.findOne({
       where: {
         name: strategyData.name,
