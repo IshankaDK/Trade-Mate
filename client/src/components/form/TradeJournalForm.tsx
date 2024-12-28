@@ -15,32 +15,8 @@ import { StrategyDto } from "../../types/StrategyDto";
 import { CurrencyDto } from "../../types/CurrencyDto";
 import { toast } from "react-toastify";
 import APIClient from "../../util/APIClient";
+import { Trade } from "../../types/TradeDto";
 
-interface Trade {
-  id?: number;
-  openDate: string;
-  closeDate: string;
-  duration: number; // in milliseconds
-  currencyPair?: CurrencyDto;
-  currencyPairId?: number;
-  status: "win" | "loss" | "";
-  type: "buy" | "sell" | "";
-  entryPrice: number;
-  exitPrice: number;
-  tradeCategories: string[];
-  marketTrend: string;
-
-  strategy?: StrategyDto;
-  strategyId?: number;
-
-  stopLossPrice: number;
-  takeProfitPrice: number;
-  transactionCost: number;
-  reason?: string;
-  comments?: string;
-
-  userId?: number;
-}
 const tradeCategories = [
   "Scalping",
   "Day Trading",
@@ -84,13 +60,11 @@ const TradeJournalForm = ({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    // Fetch data from API (e.g., currency pairs, trading strategies)
     getAllCurrencies();
     getAllStrategies();
   }, []);
 
   const getAllCurrencies = () => {
-    // Fetch all currencies from the API
     APIClient.get("/currencies/user/currency-pairs", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -105,7 +79,6 @@ const TradeJournalForm = ({
   };
 
   const getAllStrategies = () => {
-    // Fetch all trading strategies from the API
     APIClient.get("/strategies/user", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -123,7 +96,6 @@ const TradeJournalForm = ({
   };
 
   const saveTrade = () => {
-    // Save trade data to the API
     APIClient.post("/trades", trade, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -131,14 +103,13 @@ const TradeJournalForm = ({
     })
       .then(() => {
         toast.success("Trade added successfully.");
+        clearForm();
       })
       .catch((error) => {
         toast.error("Failed to add trade.");
       });
   };
 
-  // Handle input changes
-  // Handle input changes
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -169,30 +140,25 @@ const TradeJournalForm = ({
     setTrade((prev) => ({ ...prev, strategyId: strategyId }));
   };
 
-  // Calculate duration whenever dates change
   useEffect(() => {
     if (trade.openDate && trade.closeDate) {
       const open = new Date(trade.openDate);
       const close = new Date(trade.closeDate);
 
-      // Check if Close Date is later than Open Date
       if (close > open) {
         const durationInMs = close.getTime() - open.getTime();
 
-        // Update the trade state with valid duration
         setTrade((prev) => ({
           ...prev,
           duration: durationInMs, // Display as a string
         }));
         showDurationValue();
       } else if (close < open) {
-        // If Close Date is earlier than Open Date
         setDuration("Invalid duration");
         toast.error(
           "Close Date must be later than Open Date. Please check the dates."
         );
       } else {
-        // If dates are equal (unlikely but good to handle)
         setDuration("Instant trade (Open and Close Dates are the same)");
         toast.warning(
           "Open and Close Date are the same. Consider adjusting them."
@@ -201,7 +167,6 @@ const TradeJournalForm = ({
     }
   }, [trade.openDate, trade.closeDate]);
 
-  // Function to format and display the duration
   const showDurationValue = () => {
     if (trade.duration > 0) {
       const durationInMs = trade.duration;
@@ -239,19 +204,16 @@ const TradeJournalForm = ({
   };
 
   const validateForm = (trade: Trade) => {
-    // Validate Open Date
     if (!trade.openDate) {
       toast.error("Open Date is required.");
       return false;
     }
 
-    // Validate Close Date
     if (!trade.closeDate) {
       toast.error("Close Date is required.");
       return false;
     }
 
-    // Ensure that Close Date is after Open Date
     const openDate = new Date(trade.openDate);
     const closeDate = new Date(trade.closeDate);
     if (closeDate <= openDate) {
@@ -259,13 +221,10 @@ const TradeJournalForm = ({
       return false;
     }
 
-    // Validate Currency Pair ID
     if (!trade.currencyPairId) {
       toast.error("Currency Pair is required.");
       return false;
     }
-
-    // Validate Status (win or loss)
     if (!trade.status) {
       toast.error("Trade Status is required.");
       return false;
@@ -275,7 +234,6 @@ const TradeJournalForm = ({
       return false;
     }
 
-    // Validate Trade Type (buy or sell)
     if (!trade.type) {
       toast.error("Trade Type is required.");
       return false;
@@ -285,43 +243,57 @@ const TradeJournalForm = ({
       return false;
     }
 
-    // Validate Entry Price
     if (!trade.entryPrice || trade.entryPrice <= 0) {
       toast.error("Entry Price must be a positive number.");
       return false;
     }
 
-    // Validate Exit Price
     if (!trade.exitPrice || trade.exitPrice <= 0) {
       toast.error("Exit Price must be a positive number.");
       return false;
     }
 
-    // Validate Category
     if (!trade.tradeCategories || trade.tradeCategories.length === 0) {
       toast.error("Trade Category is required.");
       return false;
     }
 
-    // Validate Market Trend
     if (!trade.marketTrend) {
       toast.error("Market Trend is required.");
       return false;
     }
 
-    // Validate Strategy ID
     if (!trade.strategyId) {
       toast.error("Trading Strategy is required.");
       return false;
     }
 
-    // If all validations pass
     return true;
   };
   const handleSubmit = () => {
     if (validateForm(trade)) {
       saveTrade();
     }
+  };
+  const clearForm = () => {
+    setTrade({
+      openDate: "",
+      closeDate: "",
+      duration: 0,
+      status: "",
+      type: "",
+      entryPrice: 0,
+      exitPrice: 0,
+      tradeCategories: [],
+      marketTrend: "",
+      stopLossPrice: 0,
+      takeProfitPrice: 0,
+      transactionCost: 0,
+      reason: "",
+      comments: "",
+    });
+    setDuration("");
+    setSelectedCategories([]);
   };
 
   return (
@@ -436,7 +408,7 @@ const TradeJournalForm = ({
                       control={
                         <Checkbox
                           value={category}
-                          checked={selectedCategories.includes(category)} // Check if category is selected
+                          checked={selectedCategories.includes(category)}
                           onChange={handleCategoryChange}
                         />
                       }
@@ -447,7 +419,6 @@ const TradeJournalForm = ({
               </div>
             </div>
 
-            {/* Additional Information Section */}
             <div className="space-y-3 border">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 Additional Information

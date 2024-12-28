@@ -42,7 +42,7 @@ export const getAllTradesByUser = async (
 
         const trades = await Trade.findAll({
             where: { userId },
-            //   include: ["strategy", "currencyPair"], // Adjust associations as needed
+            include: ["strategy", "currencyPair"], // Adjust associations as needed
         });
 
         return res.status(200).json({
