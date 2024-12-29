@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { saveTrade, getAllTradesByUser, getUserTradeStats, getUserEquityCurve, getUserAverageHoldingPeriod } from "../controller/trade.controller";
+import { saveTrade, getAllTradesByUser, getUserTradeStats, getUserEquityCurve } from "../controller/trade.controller";
 
 const router = Router();
 
@@ -14,7 +14,6 @@ router.get("/user", getAllTradesByUser);
 // stats
 router.get("/users/trade-stats", getUserTradeStats);
 router.get("/users/trade-stats/equity", getUserEquityCurve);
-router.get("/users/trade-stats/avg-holding", getUserAverageHoldingPeriod);
 
 
 
