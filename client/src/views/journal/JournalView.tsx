@@ -11,7 +11,7 @@ const JournalView = () => {
 
     useEffect(() => {
         getAllTradesByUser();
-    }, [tradesList]);
+    }, []);
 
     const getAllTradesByUser = async () => {
         try {

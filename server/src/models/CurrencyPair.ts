@@ -1,4 +1,4 @@
-import {DataTypes, Model} from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db";
 
 class CurrencyPair extends Model {

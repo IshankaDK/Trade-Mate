@@ -17,6 +17,14 @@ import {Equalizer} from "@mui/icons-material";
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 export const Dashboard = () => {
+
+    
+
+
+
+
+
+
     const data = [{x: "January", y: 5000}, {x: "February", y: 5500}, {x: "March", y: 7000}, {
         x: "April", y: 6200
     }, {x: "May", y: 7200}, {x: "June", y: 6800}, {x: "July", y: 7500}, {x: "August", y: 7100}, {
