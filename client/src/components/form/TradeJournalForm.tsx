@@ -1,15 +1,14 @@
-import React, { useState, ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
   Button,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
-  FormGroup,
+  MenuItem,
+  TextField,
 } from "@mui/material";
 import { StrategyDto } from "../../types/StrategyDto";
 import { CurrencyDto } from "../../types/CurrencyDto";
@@ -32,9 +31,13 @@ const tradeCategories = [
 const TradeJournalForm = ({
   open,
   onClose,
+  data,
+  // handleSelectedData,
 }: {
   open: boolean;
   onClose: () => void;
+  data: Trade | null;
+  handleSelectedData: (data: Trade | null) => void;
 }) => {
   const [trade, setTrade] = useState<Trade>({
     openDate: "",
@@ -50,7 +53,7 @@ const TradeJournalForm = ({
     takeProfitPrice: 0,
     transactionCost: 0,
     reason: "",
-    comments: "",
+    comment: "",
   });
 
   const [currencies, setCurrencies] = useState<CurrencyDto[]>([]);
@@ -104,14 +107,17 @@ const TradeJournalForm = ({
       .then(() => {
         toast.success("Trade added successfully.");
         clearForm();
+        onClose();
       })
-      .catch((error) => {
+      .catch(() => {
         toast.error("Failed to add trade.");
+        clearForm();
+        onClose();
       });
   };
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setTrade((prev) => ({
@@ -128,8 +134,14 @@ const TradeJournalForm = ({
   };
 
   useEffect(() => {
-    console.log(trade);
-  }, [trade]);
+    console.log("UseEffect");
+    console.log(data);
+    if (data) {
+      setTrade({
+        ...data,
+      });
+    }
+  }, []);
 
   const setCurrencyId = (e: ChangeEvent<HTMLInputElement>) => {
     const currencyId = parseInt(e.target.value);
@@ -156,12 +168,12 @@ const TradeJournalForm = ({
       } else if (close < open) {
         setDuration("Invalid duration");
         toast.error(
-          "Close Date must be later than Open Date. Please check the dates."
+          "Close Date must be later than Open Date. Please check the dates.",
         );
       } else {
         setDuration("Instant trade (Open and Close Dates are the same)");
         toast.warning(
-          "Open and Close Date are the same. Consider adjusting them."
+          "Open and Close Date are the same. Consider adjusting them.",
         );
       }
     }
@@ -172,15 +184,15 @@ const TradeJournalForm = ({
       const durationInMs = trade.duration;
       const days = Math.floor(durationInMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor(
-        (durationInMs % (1000 * 60 * 60)) / (1000 * 60)
+        (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
       );
       const seconds = Math.floor((durationInMs % (1000 * 60)) / 1000);
 
       setDuration(
-        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
+        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
       );
     } else {
       setDuration("N/A");
@@ -270,9 +282,12 @@ const TradeJournalForm = ({
 
     return true;
   };
+
   const handleSubmit = () => {
-    if (validateForm(trade)) {
-      saveTrade();
+    if (!trade.id) {
+      if (validateForm(trade)) saveTrade();
+    } else {
+      // updateTrade();
     }
   };
   const clearForm = () => {
@@ -290,7 +305,7 @@ const TradeJournalForm = ({
       takeProfitPrice: 0,
       transactionCost: 0,
       reason: "",
-      comments: "",
+      comment: "",
     });
     setDuration("");
     setSelectedCategories([]);
@@ -525,13 +540,13 @@ const TradeJournalForm = ({
               </TextField>
 
               <TextField
-                name="comments"
+                name="comment"
                 size="small"
                 label="Comments/Notes"
                 multiline
                 rows={9}
                 fullWidth
-                value={trade.comments}
+                value={trade.comment}
                 onChange={handleChange}
               />
             </div>
@@ -548,7 +563,7 @@ const TradeJournalForm = ({
           className="text-sm px-4"
           onClick={handleSubmit}
         >
-          Add Trade
+          {data ? "Update" : "Save"}
         </Button>
       </DialogActions>
     </Dialog>

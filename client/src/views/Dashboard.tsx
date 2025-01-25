@@ -1,4 +1,4 @@
-import { Bar, Line } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
     BarElement,
     CategoryScale,
@@ -15,13 +15,13 @@ import {
     BarChart,
     Info,
     LineChart,
-    Scale,
     Star,
     TrendingUp,
 } from "lucide-react";
 import { Equalizer } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import APIClient from "../util/APIClient";
+import {UserDto} from "../types/UserDto.ts";
 
 ChartJS.register(
     CategoryScale,
@@ -65,6 +65,41 @@ interface EquityData {
 export const Dashboard = () => {
     const [stats, setStats] = useState<StatProps | null>(null);
     const [equityData, setEquityData] = useState<EquityData[]>([]);
+
+    const [user, setUser] = useState<UserDto>({
+        id: 0,
+        email: "",
+        mobile: "N/A",
+        dateOfBirth: new Date(),
+        addressLine1: "N/A",
+        addressLine2: "N/A",
+        city: "N/A",
+        postalCode: "N/A",
+        country: "N/A",
+        firstName: "N/A",
+        lastName: "N/A",
+        gender: "N/A",
+    });
+
+    const loadUserDetails = () => {
+        APIClient.get("/users/me", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        })
+            .then((response) => {
+                const user: UserDto = response.data.data;
+                console.log(user);
+                setUser(user);
+            })
+            .catch((error) => {
+                console.error("Failed to load user details:", error);
+            });
+    };
+
+    useEffect(() => {
+        loadUserDetails();
+    }, []);
 
     const data = equityData.map((data) => ({
         x: new Date(data.date).toLocaleString("default", {
@@ -131,11 +166,7 @@ export const Dashboard = () => {
 
     function greet(): string {
         const hours = new Date().getHours();
-        return hours < 12
-            ? "Good morning"
-            : hours < 18
-                ? "Good afternoon"
-                : "Good evening";
+        return hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
     }
     const [isDays, setIsDays] = useState(true); // To toggle between days and minutes
     const handleToggle = (unit: string) => {
@@ -148,7 +179,10 @@ export const Dashboard = () => {
                 {/* Greeting Message */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">
-                        {greet()} <span className="text-blue-600">Kasun DK</span> 👋
+                        {greet()}
+                        <span className="text-blue-600 ml-2">
+                            {user && user.firstName ? user.firstName:""}
+                        </span> 👋
                     </h1>
                     <p className="text-gray-600 mt-[0.5vw]">
                         Analyze your trading performance and stay on top of your goals.

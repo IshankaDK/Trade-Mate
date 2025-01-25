@@ -8,7 +8,6 @@ import {
 import { Login } from "./views/Login.tsx";
 import { Signup } from "./views/Signup.tsx";
 import { NotFound } from "./views/NotFound.tsx";
-import Journal from "./views/TradeJournalTable.tsx";
 import { NavBar } from "./components/nav/NavBar.tsx";
 import { UserSettingsView } from "./views/user/UserSettingsView.tsx";
 import { Dashboard } from "./views/Dashboard.tsx";

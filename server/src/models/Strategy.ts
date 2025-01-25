@@ -2,32 +2,38 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db";
 
 class Strategy extends Model {
-  public id!: number; // Auto-incremented integer primary key
-  public name!: string; // Name of the strategy
-  public type!: "Scalping" | "Swing Trading" | "Day Trading" | "Range Trading" | "Position Trading"; // Type of trading strategy
-  public comment?: string; // Optional comment or note about the strategy
-  public description!: string; // Detailed description of the strategy
-  public marketType!: "Forex" | "Crypto" | "Stocks" | "Commodities" | "Other"; // Type of market this strategy targets
-  public marketCondition!: "Bullish" | "Bearish" | "Volatile" | "Sideways"; // Expected market conditions
-  public riskLevel!: "Low" | "Medium" | "High"; // Risk level
+  public id!: number;
+  public name!: string;
+  public type!:
+    | "Scalping"
+    | "Swing Trading"
+    | "Day Trading"
+    | "Range Trading"
+    | "Position Trading";
+  public comment?: string;
+  public description!: string;
+  public marketType!: string[]; // Array of market types in the app, stored as a comma-separated string in the DB
+  public marketCondition!: string[];
+  public riskLevel!: "Low" | "Medium" | "High";
   public timeFrame!:
     | "1 Minute"
     | "5 Minutes"
     | "15 Minutes"
     | "1 Hour"
     | "4 Hours"
-    | "Daily"; // Trading time frame
-  public winRate!: number; // Percentage of successful trades
-  public totalTrades!: number; // Total number of trades executed
-  public lastModifiedDate!: Date; // Date of last modification
-  public userId!: number; // Reference to the user who created the strategy
+    | "Daily";
+  public winRate!: number;
+  public totalTrades!: number;
+  public lastModifiedDate!: Date;
+  public userId!: number;
+  public starRate!: number;
 }
 
 Strategy.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true, // Enables auto-increment
+      autoIncrement: true,
       primaryKey: true,
     },
     name: {
@@ -40,7 +46,7 @@ Strategy.init(
         "Swing Trading",
         "Day Trading",
         "Range Trading",
-        "Position Trading"
+        "Position Trading",
       ),
       allowNull: false,
     },
@@ -53,12 +59,26 @@ Strategy.init(
       allowNull: true,
     },
     marketType: {
-      type: DataTypes.ENUM("Forex", "Crypto", "Stocks", "Commodities", "Other"),
+      type: DataTypes.STRING, // Stored as a comma-separated string
       allowNull: false,
+      get() {
+        const value = this.getDataValue("marketType");
+        return value ? value.split(",") : []; // Converts string to array
+      },
+      set(value: string[]) {
+        this.setDataValue("marketType", value.join(",")); // Converts array to string
+      },
     },
     marketCondition: {
-      type: DataTypes.ENUM("Bullish", "Bearish", "Volatile", "Sideways"),
+      type: DataTypes.STRING, // Stored as a comma-separated string
       allowNull: false,
+      get() {
+        const value = this.getDataValue("marketCondition");
+        return value ? value.split(",") : []; // Converts string to array
+      },
+      set(value: string[]) {
+        this.setDataValue("marketCondition", value.join(",")); // Converts array to string
+      },
     },
     riskLevel: {
       type: DataTypes.ENUM("Low", "Medium", "High"),
@@ -78,6 +98,11 @@ Strategy.init(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    starRate: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -93,7 +118,7 @@ Strategy.init(
     tableName: "strategies",
     timestamps: true,
     updatedAt: "lastModifiedDate",
-  }
+  },
 );
 
 export default Strategy;

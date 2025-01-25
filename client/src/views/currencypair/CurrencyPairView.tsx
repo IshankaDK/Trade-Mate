@@ -36,18 +36,20 @@ const CurrencyPairDialog: React.FC<DialogProps> = ({
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
+      },
     )
       .then((response) => {
         console.log("Currency pair saved successfully: ", response.data);
         toast.success("Currency pair saved successfully.");
         refresh();
+        onClose();
       })
       .catch((error) => {
         console.error("Error saving currency pair: ", error);
         toast.error(
-          error.response.data.message || "Error saving currency pair."
+          error.response.data.message || "Error saving currency pair.",
         );
+        onClose();
       });
   };
 
@@ -90,7 +92,6 @@ const CurrencyPairDialog: React.FC<DialogProps> = ({
   );
 };
 
-
 export const CurrencyPairView: React.FC = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [currencyPairs, setCurrencyPairs] = useState<CurrencyDto[]>([]);
@@ -106,7 +107,7 @@ export const CurrencyPairView: React.FC = () => {
         setCurrencyPairs(response.data.data);
       })
       .catch((error) => {
-        toast.error(error.message||"Error fetching currency pairs.");
+        toast.error(error.message || "Error fetching currency pairs.");
       });
   };
 
@@ -128,7 +129,7 @@ export const CurrencyPairView: React.FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
         toast.error("Error deleting currency pair.");
       });
   };

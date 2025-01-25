@@ -10,7 +10,7 @@ import APIClient from "../../../util/APIClient.ts";
 export const ManageStrategyView: React.FC = () => {
   const [strategiesList, setStrategiesList] = useState<StrategyDto[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<StrategyDto | null>(
-    null
+    null,
   );
   const [openModal, setOpenModal] = useState(false);
 
@@ -46,6 +46,10 @@ export const ManageStrategyView: React.FC = () => {
   useEffect(() => {
     loadAllStrategies();
   }, []);
+
+  useEffect(() => {
+    console.log(strategiesList);
+  }, [strategiesList]);
 
   return (
     <div className="min-h-screen py-[1vw]">
@@ -93,6 +97,7 @@ export const ManageStrategyView: React.FC = () => {
           <StrategyForm
             strategy={selectedStrategy}
             loadAllStrategies={loadAllStrategies}
+            onClose={() => handleModal(false)}
           />
         </DialogContent>
       </Dialog>

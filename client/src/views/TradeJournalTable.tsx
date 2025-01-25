@@ -1,8 +1,10 @@
-import React from "react";
 import MUIDataTable, { MUIDataTableColumnDef } from "mui-datatables";
-import { Chip, ThemeProvider, createTheme } from "@mui/material";
+import { Chip, createTheme, IconButton, ThemeProvider } from "@mui/material";
 import { CurrencyDto } from "../types/CurrencyDto";
 import { StrategyDto } from "../types/StrategyDto";
+import { Delete } from "lucide-react";
+import { Trade } from "../types/TradeDto.ts";
+
 export interface TradeTableData {
   id: number;
   openDate: string;
@@ -23,7 +25,7 @@ export interface TradeTableData {
   transactionCost: number;
   reason: string;
   comment: string | null;
-  categories: string[] | null;
+  tradeCategories: string[] | null;
   createdAt: string;
   updatedAt: string;
   userId: number;
@@ -31,9 +33,17 @@ export interface TradeTableData {
 
 interface TradeJournalTableProps {
   tradeData: TradeTableData[];
+  openTradeForm: () => void;
+  onCloseTradeForm: () => void;
+  handleSelectedData: (data: Trade | null) => void;
 }
 
-const TradeJournalTable = ({ tradeData }: TradeJournalTableProps) => {
+const TradeJournalTable = ({
+  tradeData,
+  handleSelectedData,
+  openTradeForm,
+  // onCloseTradeForm,
+}: TradeJournalTableProps) => {
   const columns: MUIDataTableColumnDef[] = [
     {
       name: "openDate",
@@ -121,8 +131,16 @@ const TradeJournalTable = ({ tradeData }: TradeJournalTableProps) => {
         ),
       },
     },
-    { name: "entryPrice", label: "Entry", options: { filter: true } },
-    { name: "exitPrice", label: "Exit", options: { filter: true } },
+    {
+      name: "entryPrice",
+      label: "Entry",
+      options: { filter: true },
+    },
+    {
+      name: "exitPrice",
+      label: "Exit",
+      options: { filter: true },
+    },
     {
       name: "strategy",
       label: "Strategy",
@@ -139,8 +157,16 @@ const TradeJournalTable = ({ tradeData }: TradeJournalTableProps) => {
         ),
       },
     },
-    { name: "marketTrend", label: "Market Trend", options: { filter: true } },
-    { name: "stopLossPrice", label: "Stop Loss", options: { filter: true } },
+    {
+      name: "marketTrend",
+      label: "Market Trend",
+      options: { filter: true },
+    },
+    {
+      name: "stopLossPrice",
+      label: "Stop Loss",
+      options: { filter: true },
+    },
     {
       name: "takeProfitPrice",
       label: "Take Profit",
@@ -151,13 +177,34 @@ const TradeJournalTable = ({ tradeData }: TradeJournalTableProps) => {
       label: "Cost",
       options: { filter: true },
     },
+    {
+      name: "comment",
+      label: "Comment",
+      options: { filter: false },
+    },
+    {
+      name: "option",
+      label: "Option",
+      options: {
+        filter: false,
+        customBodyRender: (_value, tableMeta) => {
+          const data = tradeData[tableMeta.rowIndex];
+          const trade: Trade = { ...data };
 
-    // {
-    //   name: "currencyPairId",
-    //   label: "Currency Pair ID",
-    //   options: { filter: true },
-    // },
-    // // { name: "strategyId", label: "Strategy ID", options: { filter: true } },
+          return (
+            <IconButton
+              color="error"
+              onClick={() => {
+                handleSelectedData(trade);
+                openTradeForm();
+              }}
+            >
+              <Delete />
+            </IconButton>
+          );
+        },
+      },
+    },
   ];
 
   const getMuiTheme = () =>
