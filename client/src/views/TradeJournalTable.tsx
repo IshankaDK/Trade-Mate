@@ -91,7 +91,12 @@ const TradeJournalTable = ({
             label={value.toUpperCase()}
             style={{
               borderRadius: "0.5rem",
-              backgroundColor: value === "win" ? "#01B398" : "#FF8383",
+              backgroundColor:
+                value === "win"
+                  ? "#01B398"
+                  : value === "loss"
+                    ? "#FF5C5C"
+                    : "#FADA7A",
               fontWeight: "bold",
             }}
           />
@@ -108,7 +113,7 @@ const TradeJournalTable = ({
             label={value.toUpperCase()}
             style={{
               borderRadius: "0.5rem",
-              backgroundColor: value === "buy" ? "#79D7BE" : "#FADA7A",
+              backgroundColor: value === "buy" ? "#79D7BE" : "#FF5C5C",
               fontWeight: "bold",
             }}
           />

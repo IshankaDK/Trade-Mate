@@ -117,7 +117,7 @@ const TradeJournalForm = ({
   };
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setTrade((prev) => ({
@@ -168,12 +168,12 @@ const TradeJournalForm = ({
       } else if (close < open) {
         setDuration("Invalid duration");
         toast.error(
-          "Close Date must be later than Open Date. Please check the dates.",
+          "Close Date must be later than Open Date. Please check the dates."
         );
       } else {
         setDuration("Instant trade (Open and Close Dates are the same)");
         toast.warning(
-          "Open and Close Date are the same. Consider adjusting them.",
+          "Open and Close Date are the same. Consider adjusting them."
         );
       }
     }
@@ -184,15 +184,15 @@ const TradeJournalForm = ({
       const durationInMs = trade.duration;
       const days = Math.floor(durationInMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
       );
       const minutes = Math.floor(
-        (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
+        (durationInMs % (1000 * 60 * 60)) / (1000 * 60)
       );
       const seconds = Math.floor((durationInMs % (1000 * 60)) / 1000);
 
       setDuration(
-        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
+        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
       );
     } else {
       setDuration("N/A");
@@ -241,8 +241,8 @@ const TradeJournalForm = ({
       toast.error("Trade Status is required.");
       return false;
     }
-    if (!["win", "loss"].includes(trade.status)) {
-      toast.error("Trade Status must be either 'win' or 'loss'.");
+    if (!["win", "loss", "breakeven"].includes(trade.status)) {
+      toast.error("Trade Status must be either 'win' , 'loss' or 'breakeven'.");
       return false;
     }
 
@@ -390,6 +390,7 @@ const TradeJournalForm = ({
                 >
                   <MenuItem value="win">Win</MenuItem>
                   <MenuItem value="loss">Loss</MenuItem>
+                  <MenuItem value="breakeven">Breakeven</MenuItem>
                 </TextField>
                 {/* Trade Type */}
                 <TextField
