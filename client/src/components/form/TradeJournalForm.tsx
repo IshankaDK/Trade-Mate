@@ -32,7 +32,6 @@ const TradeJournalForm = ({
   open,
   onClose,
   data,
-  handleSelectedData,
 }: {
   open: boolean;
   onClose: () => void;
@@ -137,7 +136,7 @@ const TradeJournalForm = ({
   };
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setTrade((prev) => ({
@@ -178,12 +177,12 @@ const TradeJournalForm = ({
       } else if (close < open) {
         setDuration("Invalid duration");
         toast.error(
-          "Close Date must be later than Open Date. Please check the dates.",
+          "Close Date must be later than Open Date. Please check the dates."
         );
       } else {
         setDuration("Instant trade (Open and Close Dates are the same)");
         toast.warning(
-          "Open and Close Date are the same. Consider adjusting them.",
+          "Open and Close Date are the same. Consider adjusting them."
         );
       }
     }
@@ -194,15 +193,15 @@ const TradeJournalForm = ({
       const durationInMs = trade.duration;
       const days = Math.floor(durationInMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
       );
       const minutes = Math.floor(
-        (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
+        (durationInMs % (1000 * 60 * 60)) / (1000 * 60)
       );
       const seconds = Math.floor((durationInMs % (1000 * 60)) / 1000);
 
       setDuration(
-        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
+        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
       );
     } else {
       setDuration("N/A");
@@ -251,8 +250,8 @@ const TradeJournalForm = ({
       toast.error("Trade Status is required.");
       return false;
     }
-    if (!["win", "loss"].includes(trade.status)) {
-      toast.error("Trade Status must be either 'win' or 'loss'.");
+    if (!["win", "loss", "breakeven"].includes(trade.status)) {
+      toast.error("Trade Status must be either 'win' , 'loss' or 'breakeven'.");
       return false;
     }
 
@@ -319,7 +318,6 @@ const TradeJournalForm = ({
     });
     setDuration("");
     setSelectedCategories([]);
-    handleSelectedData(null);
   };
 
   return (
@@ -398,36 +396,37 @@ const TradeJournalForm = ({
                   ))}
                 </TextField>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Status */}
-                  <TextField
-                    name="status"
-                    label="Status"
-                    select
-                    fullWidth
-                    required
-                    size="small"
-                    value={trade.status}
-                    onChange={handleChange}
-                  >
-                    <MenuItem value="win">Win</MenuItem>
-                    <MenuItem value="loss">Loss</MenuItem>
-                  </TextField>
-                  {/* Trade Type */}
-                  <TextField
-                    name="type"
-                    label="Trade Type"
-                    select
-                    fullWidth
-                    required
-                    size="small"
-                    value={trade.type}
-                    onChange={handleChange}
-                  >
-                    <MenuItem value="buy">Buy</MenuItem>
-                    <MenuItem value="sell">Sell</MenuItem>
-                  </TextField>
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Status */}
+                <TextField
+                  name="status"
+                  label="Status"
+                  select
+                  fullWidth
+                  required
+                  size="small"
+                  value={trade.status}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="win">Win</MenuItem>
+                  <MenuItem value="loss">Loss</MenuItem>
+                  <MenuItem value="breakeven">Breakeven</MenuItem>
+                </TextField>
+                {/* Trade Type */}
+                <TextField
+                  name="type"
+                  label="Trade Type"
+                  select
+                  fullWidth
+                  required
+                  size="small"
+                  value={trade.type}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="buy">Buy</MenuItem>
+                  <MenuItem value="sell">Sell</MenuItem>
+                </TextField>
+              </div>
 
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 mb-2">

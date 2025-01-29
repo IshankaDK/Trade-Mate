@@ -49,7 +49,7 @@ const TradeJournalTable = ({
       name: "openDate",
       label: "Open",
       options: {
-        filter: true,
+        filter: false,
         sort: true,
         customBodyRender: (value: string) => (
           <Chip
@@ -67,7 +67,7 @@ const TradeJournalTable = ({
       name: "closeDate",
       label: "Close",
       options: {
-        filter: true,
+        filter: false,
         sort: true,
         customBodyRender: (value: string) => (
           <Chip
@@ -91,7 +91,12 @@ const TradeJournalTable = ({
             label={value.toUpperCase()}
             style={{
               borderRadius: "0.5rem",
-              backgroundColor: value === "win" ? "#01B398" : "#FF8383",
+              backgroundColor:
+                value === "win"
+                  ? "#01B398"
+                  : value === "loss"
+                    ? "#FF5C5C"
+                    : "#FADA7A",
               fontWeight: "bold",
             }}
           />
@@ -108,7 +113,7 @@ const TradeJournalTable = ({
             label={value.toUpperCase()}
             style={{
               borderRadius: "0.5rem",
-              backgroundColor: value === "buy" ? "#79D7BE" : "#FADA7A",
+              backgroundColor: value === "buy" ? "#79D7BE" : "#FF5C5C",
               fontWeight: "bold",
             }}
           />
@@ -129,17 +134,30 @@ const TradeJournalTable = ({
             }}
           />
         ),
+        filterType: "dropdown",
+        filterOptions: {
+          names: tradeData
+            .map(
+              (trade) => trade.currencyPair.from + "/" + trade.currencyPair.to
+            )
+            .filter((value, index, self) => self.indexOf(value) === index),
+          logic: (value: any, filterVal: any) => {
+            console.log(value.from, filterVal);
+
+            return value.from + "/" + value.to !== filterVal[0];
+          },
+        },
       },
     },
     {
       name: "entryPrice",
       label: "Entry",
-      options: { filter: true },
+      options: { filter: false },
     },
     {
       name: "exitPrice",
       label: "Exit",
-      options: { filter: true },
+      options: { filter: false },
     },
     {
       name: "strategy",
@@ -155,6 +173,15 @@ const TradeJournalTable = ({
             }}
           />
         ),
+        filterType: "dropdown",
+        filterOptions: {
+          names: tradeData
+            .map((trade) => trade.strategy.name)
+            .filter((value, index, self) => self.indexOf(value) === index),
+          logic: (value: any, filterVal: any) => {
+            return value.name !== filterVal[0];
+          },
+        },
       },
     },
     {
@@ -165,17 +192,17 @@ const TradeJournalTable = ({
     {
       name: "stopLossPrice",
       label: "Stop Loss",
-      options: { filter: true },
+      options: { filter: false },
     },
     {
       name: "takeProfitPrice",
       label: "Take Profit",
-      options: { filter: true },
+      options: { filter: false },
     },
     {
       name: "transactionCost",
       label: "Cost",
-      options: { filter: true },
+      options: { filter: false },
     },
     {
       name: "comment",
