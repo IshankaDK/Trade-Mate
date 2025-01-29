@@ -33,6 +33,7 @@ const JournalView = () => {
   const [data, setData] = useState<Trade | null>(null);
 
   const handleSelectedData = (newData: Trade | null) => {
+    // additional
     setData(newData);
   };
 
@@ -60,10 +61,6 @@ const JournalView = () => {
         <TradeJournalTable
           tradeData={tradesList}
           openTradeForm={() => setOpen(true)}
-          onCloseTradeForm={() => {
-            setOpen(false);
-            getAllTradesByUser();
-          }}
           handleSelectedData={handleSelectedData}
         />
       </div>
@@ -72,8 +69,7 @@ const JournalView = () => {
         data={data}
         handleSelectedData={handleSelectedData}
         open={open}
-        onClose={() => {
-          setData(null);
+        onClose={async () => {
           setOpen(false);
           getAllTradesByUser();
         }}

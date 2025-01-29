@@ -1,8 +1,8 @@
 import MUIDataTable, { MUIDataTableColumnDef } from "mui-datatables";
-import { Chip, createTheme, IconButton, ThemeProvider } from "@mui/material";
+import { Chip, createTheme, ThemeProvider } from "@mui/material";
 import { CurrencyDto } from "../types/CurrencyDto";
 import { StrategyDto } from "../types/StrategyDto";
-import { Delete } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Trade } from "../types/TradeDto.ts";
 
 export interface TradeTableData {
@@ -34,7 +34,7 @@ export interface TradeTableData {
 interface TradeJournalTableProps {
   tradeData: TradeTableData[];
   openTradeForm: () => void;
-  onCloseTradeForm: () => void;
+  // onCloseTradeForm: () => void;
   handleSelectedData: (data: Trade | null) => void;
 }
 
@@ -185,22 +185,24 @@ const TradeJournalTable = ({
     {
       name: "option",
       label: "Option",
+      // center
       options: {
         filter: false,
         customBodyRender: (_value, tableMeta) => {
           const data = tradeData[tableMeta.rowIndex];
           const trade: Trade = { ...data };
-
+          console.log(trade);
           return (
-            <IconButton
-              color="error"
+            <button
+              className="bg-green-50 border text-green-600 p-2 rounded-full hover:bg-green-100 hover:text-green-800 transition-colors"
+              aria-label="Edit"
               onClick={() => {
                 handleSelectedData(trade);
                 openTradeForm();
               }}
             >
-              <Delete />
-            </IconButton>
+              <Pencil size={15} strokeWidth={2} />
+            </button>
           );
         },
       },

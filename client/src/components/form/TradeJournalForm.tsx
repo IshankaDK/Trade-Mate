@@ -32,7 +32,7 @@ const TradeJournalForm = ({
   open,
   onClose,
   data,
-  // handleSelectedData,
+  handleSelectedData,
 }: {
   open: boolean;
   onClose: () => void;
@@ -63,9 +63,30 @@ const TradeJournalForm = ({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    getAllCurrencies();
-    getAllStrategies();
-  }, []);
+    const fetchData = async () => {
+      try {
+        await getAllCurrencies();
+        await getAllStrategies();
+
+        if (data) {
+          setTrade({
+            ...data,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      if (!data) {
+        console.log("================================Clean up");
+        clearForm();
+      }
+    };
+  }, [data]);
 
   const getAllCurrencies = () => {
     APIClient.get("/currencies/user/currency-pairs", {
@@ -89,12 +110,11 @@ const TradeJournalForm = ({
     })
       .then((response) => {
         setStrategies(response.data.data);
-        toast.success("Strategies loaded successfully!");
       })
       .catch((error) => {
         const errorMessage =
           error.response?.data?.message || "Unknown error occurred";
-        toast.error(`Failed to load strategies: ${errorMessage}`);
+        console.log(errorMessage);
       });
   };
 
@@ -132,16 +152,6 @@ const TradeJournalForm = ({
           : value,
     }));
   };
-
-  useEffect(() => {
-    console.log("UseEffect");
-    console.log(data);
-    if (data) {
-      setTrade({
-        ...data,
-      });
-    }
-  }, []);
 
   const setCurrencyId = (e: ChangeEvent<HTMLInputElement>) => {
     const currencyId = parseInt(e.target.value);
@@ -309,264 +319,285 @@ const TradeJournalForm = ({
     });
     setDuration("");
     setSelectedCategories([]);
+    handleSelectedData(null);
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle className="text-lg font-semibold">Add New Trade</DialogTitle>
-      <DialogContent>
-        <form>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Trade Details Section */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Trade Details
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {/* Open Date */}
-                <TextField
-                  name="openDate"
-                  label="Open Date"
-                  type="datetime-local"
-                  fullWidth
-                  required
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  value={trade.openDate}
-                  onChange={handleChange}
-                />
-                {/* Close Date */}
-                <TextField
-                  name="closeDate"
-                  label="Close Date"
-                  type="datetime-local"
-                  fullWidth
-                  required
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  value={trade.closeDate}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {/* Duration (Read-Only) */}
-              <TextField
-                label="Duration"
-                fullWidth
-                size="small"
-                value={duration}
-                InputProps={{ readOnly: true }}
-              />
-
-              {/* Currency Pair */}
-              <TextField
-                name="currencyPair"
-                label="Currency Pair"
-                size="small"
-                fullWidth
-                required
-                select
-                value={trade.currencyPairId}
-                onChange={setCurrencyId}
-              >
-                {currencies.map((currency) => (
-                  <MenuItem key={currency.id} value={currency.id}>
-                    {currency.from} / {currency.to}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Status */}
-                <TextField
-                  name="status"
-                  label="Status"
-                  select
-                  fullWidth
-                  required
-                  size="small"
-                  value={trade.status}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="win">Win</MenuItem>
-                  <MenuItem value="loss">Loss</MenuItem>
-                </TextField>
-                {/* Trade Type */}
-                <TextField
-                  name="type"
-                  label="Trade Type"
-                  select
-                  fullWidth
-                  required
-                  size="small"
-                  value={trade.type}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="buy">Buy</MenuItem>
-                  <MenuItem value="sell">Sell</MenuItem>
-                </TextField>
-              </div>
-
-              <div>
+    <>
+      <Dialog
+        open={open}
+        onClose={() => {
+          clearForm();
+          onClose();
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle className="text-lg font-semibold">
+          Add New Trade
+        </DialogTitle>
+        <DialogContent>
+          <form>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Trade Details Section */}
+              <div className="space-y-3">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Trading categories
+                  Trade Details
                 </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Open Date */}
+                  <TextField
+                    name="openDate"
+                    label="Open Date"
+                    type="datetime-local"
+                    fullWidth
+                    required
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={trade.openDate}
+                    onChange={handleChange}
+                  />
+                  {/* Close Date */}
+                  <TextField
+                    name="closeDate"
+                    label="Close Date"
+                    type="datetime-local"
+                    fullWidth
+                    required
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={trade.closeDate}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                {/* Render checkboxes */}
-                <div
-                  className="space-y-2"
-                  style={{ maxHeight: "200px", overflowY: "auto" }}
+                {/* Duration (Read-Only) */}
+                <TextField
+                  label="Duration"
+                  fullWidth
+                  size="small"
+                  value={duration}
+                  InputProps={{ readOnly: true }}
+                />
+
+                {/* Currency Pair */}
+                <TextField
+                  name="currencyPair"
+                  label="Currency Pair"
+                  size="small"
+                  fullWidth
+                  required
+                  select
+                  value={trade.currencyPairId}
+                  onChange={setCurrencyId}
                 >
-                  {tradeCategories.map((category) => (
-                    <FormControlLabel
-                      key={category}
-                      control={
-                        <Checkbox
-                          value={category}
-                          checked={selectedCategories.includes(category)}
-                          onChange={handleCategoryChange}
-                        />
-                      }
-                      label={category}
-                    />
+                  {currencies.map((currency) => (
+                    <MenuItem key={currency.id} value={currency.id}>
+                      {currency.from} / {currency.to}
+                    </MenuItem>
                   ))}
+                </TextField>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Status */}
+                  <TextField
+                    name="status"
+                    label="Status"
+                    select
+                    fullWidth
+                    required
+                    size="small"
+                    value={trade.status}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="win">Win</MenuItem>
+                    <MenuItem value="loss">Loss</MenuItem>
+                  </TextField>
+                  {/* Trade Type */}
+                  <TextField
+                    name="type"
+                    label="Trade Type"
+                    select
+                    fullWidth
+                    required
+                    size="small"
+                    value={trade.type}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="buy">Buy</MenuItem>
+                    <MenuItem value="sell">Sell</MenuItem>
+                  </TextField>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Trading categories
+                  </h3>
+
+                  {/* Render checkboxes */}
+                  <div
+                    className="space-y-2"
+                    style={{ maxHeight: "200px", overflowY: "auto" }}
+                  >
+                    {tradeCategories.map((category) => (
+                      <FormControlLabel
+                        key={category}
+                        control={
+                          <Checkbox
+                            value={category}
+                            checked={selectedCategories.includes(category)}
+                            onChange={handleCategoryChange}
+                          />
+                        }
+                        label={category}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-3 border">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Additional Information
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {/* Entry Price */}
+              <div className="space-y-3 border">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                  Additional Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Entry Price */}
+                  <TextField
+                    name="entryPrice"
+                    label="Entry Price"
+                    type="number"
+                    fullWidth
+                    size="small"
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.entryPrice}
+                    onChange={handleChange}
+                  />
+                  {/* Exit Price */}
+                  <TextField
+                    name="exitPrice"
+                    label="Exit Price"
+                    type="number"
+                    fullWidth
+                    size="small"
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.exitPrice}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Stop Loss Price */}
+                  <TextField
+                    name="stopLossPrice"
+                    size="small"
+                    label="Stop-Loss Price"
+                    type="number"
+                    fullWidth
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.stopLossPrice}
+                    onChange={handleChange}
+                  />
+                  {/* Take Profit Price */}
+                  <TextField
+                    name="takeProfitPrice"
+                    size="small"
+                    label="Take-Profit Price"
+                    type="number"
+                    fullWidth
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.takeProfitPrice}
+                    onChange={handleChange}
+                  />
+                  {/* transaction cost */}
+                  <TextField
+                    name="transactionCost"
+                    size="small"
+                    label="Transaction Cost"
+                    type="number"
+                    fullWidth
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.transactionCost}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Market Trend */}
                 <TextField
-                  name="entryPrice"
-                  label="Entry Price"
-                  type="number"
-                  fullWidth
+                  name="marketTrend"
+                  select
                   size="small"
+                  label="Market Trend"
+                  fullWidth
                   required
-                  inputProps={{ step: "0.01" }}
-                  value={trade.entryPrice}
+                  value={trade.marketTrend}
                   onChange={handleChange}
-                />
-                {/* Exit Price */}
+                >
+                  {["Bullish", "Bearish", "Volatile", "Sideways"].map(
+                    (trend) => (
+                      <MenuItem key={trend} value={trend}>
+                        {trend}
+                      </MenuItem>
+                    ),
+                  )}
+                </TextField>
+
+                {/* Trading Strategy */}
                 <TextField
-                  name="exitPrice"
-                  label="Exit Price"
-                  type="number"
+                  name="tradingStrategy"
+                  label="Trading Strategy"
+                  select
                   fullWidth
-                  size="small"
                   required
-                  inputProps={{ step: "0.01" }}
-                  value={trade.exitPrice}
+                  size="small"
+                  value={trade.strategyId}
+                  onChange={setStrategyId}
+                >
+                  {strategies.map((strategy) => (
+                    <MenuItem key={strategy.id} value={strategy.id}>
+                      {strategy.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <TextField
+                  name="comment"
+                  size="small"
+                  label="Comments/Notes"
+                  multiline
+                  rows={9}
+                  fullWidth
+                  value={trade.comment}
                   onChange={handleChange}
                 />
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Stop Loss Price */}
-                <TextField
-                  name="stopLossPrice"
-                  size="small"
-                  label="Stop-Loss Price"
-                  type="number"
-                  fullWidth
-                  required
-                  inputProps={{ step: "0.01" }}
-                  value={trade.stopLossPrice}
-                  onChange={handleChange}
-                />
-                {/* Take Profit Price */}
-                <TextField
-                  name="takeProfitPrice"
-                  size="small"
-                  label="Take-Profit Price"
-                  type="number"
-                  fullWidth
-                  required
-                  inputProps={{ step: "0.01" }}
-                  value={trade.takeProfitPrice}
-                  onChange={handleChange}
-                />
-                {/* transaction cost */}
-                <TextField
-                  name="transactionCost"
-                  size="small"
-                  label="Transaction Cost"
-                  type="number"
-                  fullWidth
-                  required
-                  inputProps={{ step: "0.01" }}
-                  value={trade.transactionCost}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {/* Market Trend */}
-              <TextField
-                name="marketTrend"
-                select
-                size="small"
-                label="Market Trend"
-                fullWidth
-                required
-                value={trade.marketTrend}
-                onChange={handleChange}
-              >
-                {["Bullish", "Bearish", "Volatile", "Sideways"].map((trend) => (
-                  <MenuItem key={trend} value={trend}>
-                    {trend}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              {/* Trading Strategy */}
-              <TextField
-                name="tradingStrategy"
-                label="Trading Strategy"
-                select
-                fullWidth
-                required
-                size="small"
-                value={trade.strategyId}
-                onChange={setStrategyId}
-              >
-                {strategies.map((strategy) => (
-                  <MenuItem key={strategy.id} value={strategy.id}>
-                    {strategy.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <TextField
-                name="comment"
-                size="small"
-                label="Comments/Notes"
-                multiline
-                rows={9}
-                fullWidth
-                value={trade.comment}
-                onChange={handleChange}
-              />
             </div>
-          </div>
-        </form>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} className="text-sm px-4">
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          className="text-sm px-4"
-          onClick={handleSubmit}
-        >
-          {data ? "Update" : "Save"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              clearForm();
+              onClose();
+            }}
+            className="text-sm px-4"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            className="text-sm px-4"
+            onClick={handleSubmit}
+          >
+            {data ? "Update" : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
