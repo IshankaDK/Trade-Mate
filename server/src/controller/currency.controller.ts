@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 import CurrencyPair from "../models/CurrencyPair";
 import User from "../models/User";
-import { StandardResponse } from "../dto/StandardResponse";
-import { getClaimsFromToken } from "../utils/Jwt.utils";
+import {StandardResponse} from "../dto/StandardResponse";
+import {getClaimsFromToken} from "../utils/Jwt.utils";
 
 export const saveCurrencyPair = async (
   req: Request,

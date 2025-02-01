@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 import Strategy from "../models/Strategy";
-import { StandardResponse } from "../dto/StandardResponse";
-import { getClaimsFromToken } from "../utils/Jwt.utils";
+import {StandardResponse} from "../dto/StandardResponse";
+import {getClaimsFromToken} from "../utils/Jwt.utils";
 import User from "../models/User";
+import Trade from "../models/Trade";
 
 // Create a new Strategy
 export const createStrategy = async (
@@ -48,32 +49,44 @@ export const createStrategy = async (
     });
   }
 };
-
 // Get all Strategies
 export const getAllStrategiesByUser = async (
-  req: Request,
-  res: Response<StandardResponse<Strategy[]>>
+    req: Request,
+    res: Response<StandardResponse<Strategy[]>>
 ) => {
   try {
     console.log("Method getAllStrategiesByUser called");
     const token: string = req.headers.authorization?.split(" ")[1] || "";
     const claims = getClaimsFromToken(token);
     const userId = claims.id;
+
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "userId is required.",
+        message: "User ID is required.",
       });
     }
 
-    const strategies = await Strategy.findAll({
-      where: { userId },
-    });
+    const strategies = await Strategy.findAll({ where: { userId } });
+
+    // Fetch trades and calculate win rate concurrently
+    const strategiesWithWinRate = await Promise.all(
+        strategies.map(async (strategy) => {
+          const trades = await Trade.findAll({ where: { strategyId: strategy.id } });
+          const totalTrades = trades.length;
+          const winningTrades = trades.filter(trade => trade.status === "win").length;
+
+          const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+          strategy.setDataValue("winRate", winRate.toFixed(2)); // Keep only 2 decimal places
+
+          return strategy;
+        })
+    );
 
     return res.status(200).json({
       success: true,
       message: "Strategies retrieved successfully.",
-      data: strategies,
+      data: strategiesWithWinRate,
     });
   } catch (error) {
     console.error("Error fetching strategies:", error);
@@ -84,6 +97,7 @@ export const getAllStrategiesByUser = async (
     });
   }
 };
+
 
 // Get a Strategy by ID
 export const getStrategyById = async (
@@ -194,6 +208,45 @@ export const deleteStrategyById = async (
     });
   } catch (error) {
     console.error("Error deleting strategy:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+
+// Endpoint to get trades by strategy id
+export const getAssociatedTrades = async (
+    req: Request,
+    res: Response<StandardResponse<any>>
+) => {
+  try {
+    const {strategyId} = req.body;
+
+    // Fetch trades associated with the given strategyId
+    const trades = await Trade.findAll({
+      where: {
+        strategyId, // Query trades by strategyId
+      },
+    });
+
+    if (!trades || trades.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "No trades found for the given strategy ID.",
+        data:[]
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Trades fetched successfully.",
+      data: trades,
+    });
+  } catch (error) {
+    console.error("Error fetching trades by strategy ID:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",

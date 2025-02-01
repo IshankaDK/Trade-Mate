@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 import Trade from "../models/Trade";
-import { StandardResponse } from "../dto/StandardResponse";
-import { getClaimsFromToken } from "../utils/Jwt.utils";
+import {StandardResponse} from "../dto/StandardResponse";
+import {getClaimsFromToken} from "../utils/Jwt.utils";
 import Strategy from "../models/Strategy";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 
 // Create a Trade
 export const saveTrade = async (

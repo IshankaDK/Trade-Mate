@@ -1,7 +1,9 @@
-import React from "react";
-import { CalendarIcon, Info, Pencil, Star, Trash } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { CalendarIcon, Info, Pencil, Star, Trash, X } from "lucide-react";
 import { StrategyDto } from "../../types/StrategyDto.ts";
 import { toast } from "react-toastify";
+import MUIDataTable from "mui-datatables";
+import { Chip, Dialog } from "@mui/material";
 import APIClient from "../../util/APIClient.ts";
 
 interface StrategyCardProps {
@@ -9,6 +11,146 @@ interface StrategyCardProps {
   onEdit: (strategy: StrategyDto) => void;
   loadAllStrategies: () => void;
 }
+
+interface PopupViewProps {
+  showRelatedTradeTable: boolean;
+  setShowRelatedTradeTable: (show: boolean) => void;
+  strategy: StrategyDto;
+}
+
+const PopupView: React.FC<PopupViewProps> = ({
+  showRelatedTradeTable,
+  setShowRelatedTradeTable,
+  strategy,
+}) => {
+  const [tradeData, setTradeData] = useState<any>([]);
+
+  useEffect(() => {
+    APIClient.post(`strategies/trades-list`, {
+      strategyId: strategy.id,
+    })
+      .then((response) => {
+        setTradeData(response.data?.data || []);
+      })
+      .catch(() => {
+        // console.error("Failed to fetch trades: ", error);
+      });
+  }, [strategy.id]);
+
+  const columns = [
+    { name: "id", label: "ID", options: { sort: true } },
+    {
+      name: "openDate",
+      label: "Open Date",
+      options: {
+        sort: true,
+        customBodyRender: (value: any) => (
+          <Chip
+            label={new Date(value).toLocaleString()}
+            style={{
+              borderRadius: "0.5rem",
+              color: "black",
+              fontSize: "0.7rem",
+            }}
+          />
+        ),
+      },
+    },
+    {
+      name: "closeDate",
+      label: "Close Date",
+      options: {
+        sort: true,
+        customBodyRender: (value: any) => (
+          <Chip
+            label={new Date(value).toLocaleString()}
+            style={{
+              borderRadius: "0.5rem",
+              color: "black",
+              fontSize: "0.7rem",
+            }}
+          />
+        ),
+      },
+    },
+    {
+      name: "status",
+      label: "Status",
+      options: {
+        filter: true,
+        customBodyRender: (value: any) => (
+          <Chip
+            label={value.toUpperCase()}
+            style={{
+              borderRadius: "0.5rem",
+              backgroundColor:
+                value === "win"
+                  ? "#01B398"
+                  : value === "loss"
+                    ? "#FF5C5C"
+                    : "#FADA7A",
+              fontWeight: "bold",
+            }}
+          />
+        ),
+      },
+    },
+    { name: "type", label: "Type" },
+    { name: "duration", label: "Duration" },
+    { name: "entryPrice", label: "Entry Price" },
+    { name: "exitPrice", label: "Exit Price" },
+    { name: "marketTrend", label: "Market Trend" },
+    { name: "stopLossPrice", label: "Stop Loss" },
+    { name: "takeProfitPrice", label: "Take Profit" },
+    { name: "transactionCost", label: "Transaction Cost" },
+    { name: "comment", label: "Comment" },
+  ];
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
+      <Dialog
+        open={showRelatedTradeTable}
+        onClose={() => setShowRelatedTradeTable(false)}
+        aria-labelledby="trade-journal-dialog"
+        fullWidth
+        maxWidth="lg"
+      >
+        <div className="bg-white rounded-xl shadow-xl p-6 border border-gray-200 relative">
+          {/* Close Button */}
+          <button
+            className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all"
+            onClick={() => setShowRelatedTradeTable(false)}
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+
+          {/* Table Section */}
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Trade Journal
+          </h2>
+          <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
+            <MUIDataTable
+              title={""}
+              data={tradeData}
+              columns={columns}
+              options={{
+                filterType: "dropdown",
+                responsive: "standard",
+                selectableRows: "none",
+                download: true,
+                print: true,
+                search: true,
+                pagination: true,
+                elevation: 0,
+              }}
+            />
+          </div>
+        </div>
+      </Dialog>
+    </div>
+  );
+};
 
 export const StrategyCard: React.FC<StrategyCardProps> = ({
   strategy,
@@ -42,15 +184,41 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
   const mapRiskLevelToColor = (riskLevel: string) =>
     riskLevelColors[riskLevel] || "";
 
+  const [showRelatedTradeTable, setShowRelatedTradeTable] = useState(false);
+  const relatedTradeTableRef = useRef<HTMLDivElement>(null);
+
+  // Handle clicks outside the related trade table
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        relatedTradeTableRef.current &&
+        !relatedTradeTableRef.current.contains(event.target as Node)
+      ) {
+        setShowRelatedTradeTable(false); // Close the table if clicked outside
+      }
+    };
+
+    // Add event listener if the table is visible
+    if (showRelatedTradeTable) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Clean up the event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showRelatedTradeTable]);
+
   return (
-    <div className="w-full max-w-md bg-white shadow-2xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="bg-gradient-to-r  p-4 pb-2">
+    <div className="w-full max-w-md bg-white shadow-2xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg static">
+      <div className="bg-gradient-to-r p-4 pb-2">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold text-gray-900">{strategy.name}</h2>
           <div className="flex space-x-2">
             <button
               className="bg-blue-50 text-blue-600 p-2 rounded-full hover:bg-blue-100 hover:text-blue-800 transition-colors"
               aria-label="Info"
+              onClick={() => setShowRelatedTradeTable(!showRelatedTradeTable)}
             >
               <Info size={15} strokeWidth={2} />
             </button>
@@ -94,9 +262,9 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
       <div className="px-4 py-3 border-t">
         <div className="grid grid-cols-3 gap-4 bg-gray-50 p-3 rounded-lg">
           <div className="text-center">
-            <p className="text-xs  text-gray-500  tracking-wider">Risk Level</p>
+            <p className="text-xs text-gray-500 tracking-wider">Risk Level</p>
             <p
-              className={` font-bold ${mapRiskLevelToColor(strategy.riskLevel)}`}
+              className={`font-bold ${mapRiskLevelToColor(strategy.riskLevel)}`}
             >
               {strategy.riskLevel}
             </p>
@@ -105,7 +273,7 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
           <div className="text-center">
             <p className="text-xs text-gray-500 tracking-wider">Win Rate</p>
             <p className="text-lg font-bold text-blue-800">
-              {strategy.winRate.toFixed(2)}%
+              {strategy.winRate}%
             </p>
           </div>
 
@@ -170,6 +338,14 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
             })}
         </div>
       </div>
+
+      {showRelatedTradeTable && (
+        <PopupView
+          showRelatedTradeTable={showRelatedTradeTable}
+          strategy={strategy}
+          setShowRelatedTradeTable={setShowRelatedTradeTable}
+        />
+      )}
     </div>
   );
 };

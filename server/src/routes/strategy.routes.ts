@@ -1,10 +1,11 @@
-import { Router } from "express";
+import {Router} from "express";
 import {
     createStrategy,
-    getAllStrategiesByUser,
-    getStrategyById,
-    updateStrategyById,
     deleteStrategyById,
+    getAllStrategiesByUser,
+    getAssociatedTrades,
+    getStrategyById,
+    updateStrategyById
 } from "../controller/strategy.controller";
 
 const router = Router();
@@ -15,6 +16,9 @@ router.post("/", createStrategy);
 // Get all strategies by userId
 router.get("/user", getAllStrategiesByUser);
 
+// Get all trades associated with a strategy
+router.post("/trades-list", getAssociatedTrades);
+
 // Get a single strategy by ID
 router.get("/:id", getStrategyById);
 
@@ -23,5 +27,6 @@ router.put("/:id", updateStrategyById);
 
 // Delete a strategy by ID
 router.delete("/:id", deleteStrategyById);
+
 
 export default router;
