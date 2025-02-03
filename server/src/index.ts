@@ -28,7 +28,7 @@ async function startServer() {
     });
 
     await connection.query(
-      `CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``
+      `CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``,
     );
     console.log(`Database ${process.env.DB_NAME} created successfully.`);
     await connection.end();

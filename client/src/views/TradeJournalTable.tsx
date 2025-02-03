@@ -29,6 +29,7 @@ export interface TradeTableData {
   createdAt: string;
   updatedAt: string;
   userId: number;
+  profit: number;
 }
 
 interface TradeJournalTableProps {
@@ -138,7 +139,7 @@ const TradeJournalTable = ({
         filterOptions: {
           names: tradeData
             .map(
-              (trade) => trade.currencyPair.from + "/" + trade.currencyPair.to
+              (trade) => trade.currencyPair.from + "/" + trade.currencyPair.to,
             )
             .filter((value, index, self) => self.indexOf(value) === index),
           logic: (value: any, filterVal: any) => {
@@ -157,6 +158,11 @@ const TradeJournalTable = ({
     {
       name: "exitPrice",
       label: "Exit",
+      options: { filter: false },
+    },
+    {
+      name: "positionSize",
+      label: "Position Size",
       options: { filter: false },
     },
     {
@@ -205,6 +211,11 @@ const TradeJournalTable = ({
       options: { filter: false },
     },
     {
+      name: "profit",
+      label: "Profit",
+      options: { filter: false },
+    },
+    {
       name: "comment",
       label: "Comment",
       options: { filter: false },
@@ -218,7 +229,6 @@ const TradeJournalTable = ({
         customBodyRender: (_value, tableMeta) => {
           const data = tradeData[tableMeta.rowIndex];
           const trade: Trade = { ...data };
-          console.log(trade);
           return (
             <button
               className="bg-green-50 border text-green-600 p-2 rounded-full hover:bg-green-100 hover:text-green-800 transition-colors"

@@ -21,6 +21,7 @@ export const UserSettingsView: React.FC = () => {
     firstName: "N/A",
     lastName: "N/A",
     gender: "N/A",
+    initial_capital: 0.0,
   });
   const [date, setDate] = useState<string>(new Date().toLocaleString());
   const [modalOpen, setModalOpen] = useState<boolean>(false);

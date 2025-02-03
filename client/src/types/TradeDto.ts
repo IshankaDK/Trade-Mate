@@ -25,4 +25,5 @@ export interface Trade {
   comment?: string | null;
 
   userId?: number;
+  positionSize?: number | null;
 }

@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { saveTrade, getAllTradesByUser, getUserTradeStats, getUserEquityCurve } from "../controller/trade.controller";
+import {
+  saveTrade,
+  getAllTradesByUser,
+  getUserTradeStats,
+  getUserEquityCurve,
+} from "../controller/trade.controller";
 
 const router = Router();
 
@@ -14,7 +19,5 @@ router.get("/user", getAllTradesByUser);
 // stats
 router.get("/users/trade-stats", getUserTradeStats);
 router.get("/users/trade-stats/equity", getUserEquityCurve);
-
-
 
 export default router;

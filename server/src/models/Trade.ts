@@ -19,7 +19,7 @@ class Trade extends Model {
   public entryPrice!: number;
   public exitPrice!: number;
 
-  public positionSize!: string;
+  public positionSize!: number;
   public marketTrend!: string;
 
   public stopLossPrice!: number;
@@ -28,8 +28,14 @@ class Trade extends Model {
 
   public reason!: string;
   public comment!: string;
+  public profit!: number;
 
   public categories!: string[]; // Categories as an array of strings
+  totalWinProfit!: string;
+  winCount!: string;
+  totalLossProfit!: string;
+  lossCount!: string;
+  totalProfitBeforeLoss!: number;
 }
 
 Trade.init(
@@ -116,13 +122,18 @@ Trade.init(
       type: DataTypes.JSON, // Store categories as JSON
       allowNull: true,
     },
+    profit: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    },
   },
   {
     sequelize,
     modelName: "Trade",
     tableName: "trades",
     timestamps: true,
-  }
+  },
 );
 
 export default Trade;

@@ -67,7 +67,7 @@ export const Login = () => {
         switch (status) {
           case 400:
             toast.error(
-              data.message || "Invalid input. Please check your details."
+              data.message || "Invalid input. Please check your details.",
             );
             break;
           case 401:
@@ -75,7 +75,7 @@ export const Login = () => {
             break;
           case 500:
             toast.error(
-              data.message || "Server error. Please try again later."
+              data.message || "Server error. Please try again later.",
             );
             break;
           default:
@@ -83,7 +83,7 @@ export const Login = () => {
         }
       } else if (error.request) {
         toast.error(
-          "Unable to connect to the server. Please check your network."
+          "Unable to connect to the server. Please check your network.",
         );
       } else {
         toast.error("Something went wrong. Please try again later.");

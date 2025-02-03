@@ -15,6 +15,7 @@ class User extends Model {
   public postalCode!: string;
   public country!: string;
   public gender!: "MALE" | "FEMALE" | "OTHER";
+  public initial_capital!: number;
 }
 
 User.init(
@@ -27,7 +28,7 @@ User.init(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,  // Ensure unique emails
+      unique: true, // Ensure unique emails
     },
     password: {
       type: DataTypes.STRING,
@@ -79,13 +80,16 @@ User.init(
       type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
       allowNull: true,
     },
+    initial_capital: {
+      type: DataTypes.FLOAT,
+    },
   },
   {
     sequelize,
     modelName: "User",
     tableName: "users",
     timestamps: true,
-  }
+  },
 );
 
 export default User;

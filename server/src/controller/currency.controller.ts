@@ -1,12 +1,12 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import CurrencyPair from "../models/CurrencyPair";
 import User from "../models/User";
-import {StandardResponse} from "../dto/StandardResponse";
-import {getClaimsFromToken} from "../utils/Jwt.utils";
+import { StandardResponse } from "../dto/StandardResponse";
+import { getClaimsFromToken } from "../utils/Jwt.utils";
 
 export const saveCurrencyPair = async (
   req: Request,
-  res: Response<StandardResponse<CurrencyPair>>
+  res: Response<StandardResponse<CurrencyPair>>,
 ) => {
   try {
     const { from, to } = req.body;
@@ -62,7 +62,7 @@ export const saveCurrencyPair = async (
 
 export const getCurrencyPairsByUser = async (
   req: Request,
-  res: Response<StandardResponse<CurrencyPair[]>>
+  res: Response<StandardResponse<CurrencyPair[]>>,
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -90,7 +90,7 @@ export const getCurrencyPairsByUser = async (
 
 export const getCurrencyPairsById = async (
   req: Request,
-  res: Response<StandardResponse<CurrencyPair>>
+  res: Response<StandardResponse<CurrencyPair>>,
 ) => {
   try {
     const { id } = req.params;
@@ -120,7 +120,7 @@ export const getCurrencyPairsById = async (
 
 export const deleteCurrencyPairById = async (
   req: Request,
-  res: Response<StandardResponse<null>>
+  res: Response<StandardResponse<null>>,
 ) => {
   try {
     const { id } = req.params;

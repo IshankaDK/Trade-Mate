@@ -11,4 +11,5 @@ export interface UserDto {
   postalCode?: string;
   country?: string;
   gender?: string;
+  initial_capital?: number;
 }

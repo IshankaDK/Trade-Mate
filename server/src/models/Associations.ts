@@ -4,58 +4,58 @@ import Strategy from "./Strategy";
 import Trade from "./Trade";
 
 export const configAssociations = () => {
-    // User and CurrencyPair relationship
-    User.hasMany(CurrencyPair, {
-        foreignKey: "userId",
-        as: "currencyPairs",
-    });
+  // User and CurrencyPair relationship
+  User.hasMany(CurrencyPair, {
+    foreignKey: "userId",
+    as: "currencyPairs",
+  });
 
-    CurrencyPair.belongsTo(User, {
-        foreignKey: "userId",
-        as: "user",
-    });
+  CurrencyPair.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+  });
 
-    // User and Strategy relationship
-    User.hasMany(Strategy, {
-        foreignKey: "userId",
-        as: "strategies",
-    });
+  // User and Strategy relationship
+  User.hasMany(Strategy, {
+    foreignKey: "userId",
+    as: "strategies",
+  });
 
-    Strategy.belongsTo(User, {
-        foreignKey: "userId",
-        as: "user",
-    });
+  Strategy.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+  });
 
-    // User and Trade relationship
-    User.hasMany(Trade, {
-        foreignKey: "userId",
-        as: "trades",
-    });
+  // User and Trade relationship
+  User.hasMany(Trade, {
+    foreignKey: "userId",
+    as: "trades",
+  });
 
-    Trade.belongsTo(User, {
-        foreignKey: "userId",
-        as: "user",
-    });
+  Trade.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+  });
 
-    // Strategy and Trade relationship
-    Strategy.hasMany(Trade, {
-        foreignKey: "strategyId",
-        as: "trades",
-    });
+  // Strategy and Trade relationship
+  Strategy.hasMany(Trade, {
+    foreignKey: "strategyId",
+    as: "trades",
+  });
 
-    Trade.belongsTo(Strategy, {
-        foreignKey: "strategyId",
-        as: "strategy",
-    });
+  Trade.belongsTo(Strategy, {
+    foreignKey: "strategyId",
+    as: "strategy",
+  });
 
-    // CurrencyPair and Trade relationship
-    CurrencyPair.hasMany(Trade, {
-        foreignKey: "currencyPairId",
-        as: "trades",
-    });
+  // CurrencyPair and Trade relationship
+  CurrencyPair.hasMany(Trade, {
+    foreignKey: "currencyPairId",
+    as: "trades",
+  });
 
-    Trade.belongsTo(CurrencyPair, {
-        foreignKey: "currencyPairId",
-        as: "currencyPair",
-    });
+  Trade.belongsTo(CurrencyPair, {
+    foreignKey: "currencyPairId",
+    as: "currencyPair",
+  });
 };

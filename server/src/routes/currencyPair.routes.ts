@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {
-    deleteCurrencyPairById,
-    getCurrencyPairsById,
-    getCurrencyPairsByUser,
-    saveCurrencyPair,
+  deleteCurrencyPairById,
+  getCurrencyPairsById,
+  getCurrencyPairsByUser,
+  saveCurrencyPair,
 } from "../controller/currency.controller";
 
 const router = Router();

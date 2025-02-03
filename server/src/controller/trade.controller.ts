@@ -1,9 +1,11 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import Trade from "../models/Trade";
-import {StandardResponse} from "../dto/StandardResponse";
-import {getClaimsFromToken} from "../utils/Jwt.utils";
+import { StandardResponse } from "../dto/StandardResponse";
+import { getClaimsFromToken } from "../utils/Jwt.utils";
 import Strategy from "../models/Strategy";
-import {Op} from "sequelize";
+import { Op, Sequelize } from "sequelize";
+import CurrencyPair from "../models/CurrencyPair";
+import User from "../models/User";
 
 // Create a Trade
 export const saveTrade = async (
@@ -11,11 +13,17 @@ export const saveTrade = async (
   res: Response<StandardResponse<Trade>>,
 ) => {
   try {
-    const tradeData = req.body;
+    let tradeData = req.body;
     tradeData.userId = getClaimsFromToken(
       req.headers.authorization?.split(" ")[1] || "",
     ).id;
     console.log("tradeData", tradeData);
+
+    tradeData = {
+      ...tradeData,
+      profit:
+        (tradeData.exitPrice - tradeData.entryPrice) * tradeData.positionSize,
+    };
 
     const trade = await Trade.create(tradeData);
     return res.status(201).json({
@@ -241,38 +249,57 @@ const getProfitableStrategy = async (
   }
 };
 
-// Helper method to get the highest win trade profit and trade ID
-const getHighestWinTradeProfit = async (
-  userId: number,
-): Promise<{ tradeId: number; profit: number } | null> => {
-  try {
-    const winTrades = await Trade.findAll({
-      where: { userId, status: "win" },
-      attributes: ["id", "exitPrice", "entryPrice"],
-    });
+const getHighestWinTradeProfit = async (userId: number) => {
+  const highestWinTrade = await Trade.findOne({
+    where: {
+      userId: userId,
+    },
+    order: [["profit", "DESC"]],
+    attributes: ["profit"],
+  });
 
-    if (winTrades.length === 0) {
-      return null;
-    }
+  return highestWinTrade ? highestWinTrade.profit : 0;
+};
 
-    let highestProfitTrade: { tradeId: number; profit: number } = {
-      tradeId: 0,
-      profit: -Infinity,
-    };
+// Helper method to get the highest loss trade profit
+const getHighestLossTradeProfit = async (userId: number) => {
+  const highestLossTrade = await Trade.findOne({
+    where: {
+      userId: userId,
+    },
+    order: [["profit", "ASC"]],
+    attributes: ["profit"],
+  });
 
-    winTrades.forEach((trade) => {
-      const profit = trade.exitPrice - trade.entryPrice;
+  return highestLossTrade ? highestLossTrade.profit : 0;
+};
 
-      if (profit > highestProfitTrade.profit) {
-        highestProfitTrade = { tradeId: trade.id, profit };
-      }
-    });
+//get strategy name with it
 
-    return highestProfitTrade;
-  } catch (error) {
-    console.error("Error fetching highest win trade profit:", error);
-    return null;
-  }
+const getMostProfitableStrategy = async (userId: number) => {
+  const result = await Trade.findOne({
+    where: { userId },
+    attributes: [
+      "strategyId",
+      [Sequelize.fn("SUM", Sequelize.col("profit")), "totalProfit"],
+    ],
+    include: [
+      {
+        model: Strategy,
+        as: "strategy",
+        attributes: ["name"], // Fetch strategy name
+      },
+    ],
+    group: ["strategyId", "strategy.id", "strategy.name"],
+    order: [[Sequelize.fn("SUM", Sequelize.col("profit")), "DESC"]],
+  });
+  return result ? result : null;
+};
+
+const getTotalCurrencyPairsCount = async (userId: number) => {
+  return await CurrencyPair.count({
+    where: { userId: userId },
+  });
 };
 
 // Method to calculate net daily P&L
@@ -339,6 +366,97 @@ const getAverageHoldingPeriod = async (userId: number) => {
   }
 };
 
+const getDrawDownRatio = async (userId: number) => {
+  try {
+    const highestLossTrade = await Trade.findOne({
+      where: { userId },
+      order: [["profit", "ASC"]], // Lowest profit (largest loss)
+      attributes: ["profit", "openDate"],
+      raw: true,
+    });
+
+    if (!highestLossTrade) return null; // No trades found
+
+    const largestLoss = highestLossTrade.profit;
+    const lossDate = highestLossTrade.openDate;
+
+    const { totalProfitBeforeLoss } = (await Trade.findOne({
+      where: {
+        userId,
+        openDate: { lossDate },
+      },
+      attributes: [
+        [
+          Sequelize.fn(
+            "COALESCE",
+            Sequelize.fn("SUM", Sequelize.col("profit")),
+            0,
+          ),
+          "totalProfitBeforeLoss",
+        ],
+      ],
+      raw: true,
+    })) || { totalProfitBeforeLoss: 0 };
+
+    // If there’s no balance before loss, assume user's initial capital
+    let accountBalanceBeforeLoss = totalProfitBeforeLoss;
+    if (accountBalanceBeforeLoss === 0) {
+      const user = await User.findOne({
+        where: { id: userId },
+        attributes: ["initial_capital"],
+        raw: true,
+      });
+      accountBalanceBeforeLoss = user?.initial_capital || 0;
+    }
+
+    if (accountBalanceBeforeLoss === 0) return null; // Prevent division by zero
+
+    const drawdownRatio =
+      (Math.abs(largestLoss) / accountBalanceBeforeLoss) * 100;
+
+    return drawdownRatio;
+  } catch (error) {
+    console.error("Error calculating drawdown ratio:", error);
+    return 0;
+  }
+};
+
+const getRiskToRewardRatio = async (userId: number) => {
+  // Get sum of profit where status = "win"
+  const winData = await Trade.findOne({
+    where: { userId, status: "win" },
+    attributes: [
+      [Sequelize.fn("SUM", Sequelize.col("profit")), "totalWinProfit"],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "winCount"],
+    ],
+    raw: true,
+  });
+
+  // Get sum of profit where status = "loss"
+  const lossData = await Trade.findOne({
+    where: { userId, status: "loss" },
+    attributes: [
+      [Sequelize.fn("SUM", Sequelize.col("profit")), "totalLossProfit"],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "lossCount"],
+    ],
+    raw: true,
+  });
+
+  const totalWinProfit = parseFloat(winData?.totalWinProfit || "0");
+  const winCount = parseInt(winData?.winCount || "0");
+  const totalLossProfit = parseFloat(lossData?.totalLossProfit || "0");
+  const lossCount = parseInt(lossData?.lossCount || "0");
+
+  if (winCount === 0 || lossCount === 0) return null; // Avoid division by zero
+
+  // Calculate averages
+  const avgWin = totalWinProfit / winCount;
+  const avgLoss = Math.abs(totalLossProfit / lossCount); // Ensure positive loss value
+
+  // Risk-to-Reward Ratio = (avg loss per trade / avg win per trade) * 100
+  return (avgLoss / avgWin) * 100;
+};
+
 // Endpoint to get User's Trade Statistics
 export const getUserTradeStats = async (
   req: Request,
@@ -360,6 +478,11 @@ export const getUserTradeStats = async (
     const highestWinTrade = await getHighestWinTradeProfit(userId);
     const dailyPL = await calculateNetDailyPL(userId, new Date());
     const averageHoldingPeriod = await getAverageHoldingPeriod(userId);
+    const highestLossTrade = await getHighestLossTradeProfit(userId);
+    const totalCurrencyPairsCount = await getTotalCurrencyPairsCount(userId);
+    const mostProfitableStrategy = await getMostProfitableStrategy(userId);
+    const riskToRewardRatio = await getRiskToRewardRatio(userId);
+    const drawDownRatio = await getDrawDownRatio(userId);
 
     const data = {
       totalTrades: generalStats.totalTrades,
@@ -372,6 +495,11 @@ export const getUserTradeStats = async (
       highestWinTrade,
       dailyPL,
       averageHoldingPeriod,
+      highestLossTrade,
+      totalCurrencyPairsCount,
+      mostProfitableStrategy,
+      riskToRewardRatio,
+      drawDownRatio,
     };
     console.log(data);
 

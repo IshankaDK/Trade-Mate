@@ -14,7 +14,7 @@ import { UserDto } from "../../types/UserDto";
 import APIClient from "../../util/APIClient";
 import { toast } from "react-toastify";
 import { UpdateUserFormProps } from "../../types/UpdateUserFormProps.ts";
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import CountryList from "react-select-country-list";
 
 export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
@@ -25,8 +25,10 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<UserDto>(user);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [countryList, setCountryList] = useState<any>([]);
-  
+  const [countryList, setCountryList] = useState<
+    { value: string; label: string }[]
+  >([]);
+
   const genderOptions = [
     { value: "MALE", label: "Male" },
     { value: "FEMALE", label: "Female" },
@@ -77,10 +79,16 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       errors.dateOfBirth = "Invalid Date of Birth";
     }
 
+    if (
+      formData.initial_capital === undefined ||
+      formData.initial_capital === null
+    ) {
+      errors.initial_capital = "Initial Capital is required";
+    }
+
     return errors;
   };
 
-  // Update user details
   const updateUserDetails = () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -99,7 +107,10 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       postalCode: formData.postalCode,
       country: formData.country,
       gender: formData.gender,
+      initial_capital: formData.initial_capital,
     };
+
+    console.log(formDataToSubmit);
 
     APIClient.patch("/users", formDataToSubmit, {
       headers: {
@@ -128,7 +139,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -142,7 +153,9 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
     }));
   };
 
-  const handleCountryChange = (selectedOption: any) => {
+  const handleCountryChange = (
+    selectedOption: SingleValue<{ value: string; label: string }>,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       country: selectedOption ? selectedOption.value : "",
@@ -154,7 +167,9 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
     }));
   };
 
-  const handleGenderChange = (selectedOption: any) => {
+  const handleGenderChange = (
+    selectedOption: SingleValue<{ value: string; label: string }>,
+  ) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       gender: selectedOption ? selectedOption.value : "",
@@ -293,7 +308,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
           <Box sx={{ marginBottom: 2 }}>
             <Select
               options={countryList}
-              value={countryList.find((c: any) => c.value === formData.country)}
+              value={countryList.find((c) => c.value === formData.country)}
               onChange={handleCountryChange}
               placeholder="Select Country"
               isClearable
@@ -306,7 +321,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
             <Select
               options={genderOptions}
               value={genderOptions.find(
-                (option) => option.value === formData.gender
+                (option) => option.value === formData.gender,
               )}
               onChange={handleGenderChange}
               placeholder="Select Gender"
@@ -314,6 +329,20 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
             {errors.gender && (
               <div style={{ color: "red" }}>{errors.gender}</div>
             )}
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="Initial Capital"
+              size="small"
+              type="number"
+              name="initial_capital"
+              value={formData.initial_capital}
+              onChange={handleChange}
+              fullWidth
+              required
+              error={!!errors.initial_capital}
+              helperText={errors.initial_capital}
+            />
           </Box>
 
           <Box>

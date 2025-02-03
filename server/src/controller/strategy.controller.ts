@@ -1,21 +1,21 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import Strategy from "../models/Strategy";
-import {StandardResponse} from "../dto/StandardResponse";
-import {getClaimsFromToken} from "../utils/Jwt.utils";
+import { StandardResponse } from "../dto/StandardResponse";
+import { getClaimsFromToken } from "../utils/Jwt.utils";
 import User from "../models/User";
 import Trade from "../models/Trade";
 
 // Create a new Strategy
 export const createStrategy = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>
+  res: Response<StandardResponse<Strategy>>,
 ) => {
   try {
     console.log("Method createStrategy called");
     const strategyData = req.body;
     console.log(strategyData);
     strategyData.userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || ""
+      req.headers.authorization?.split(" ")[1] || "",
     ).id;
 
     // Validate that all required fields are provided
@@ -50,37 +50,53 @@ export const createStrategy = async (
   }
 };
 // Get all Strategies
+
 export const getAllStrategiesByUser = async (
-    req: Request,
-    res: Response<StandardResponse<Strategy[]>>
+  req: Request,
+  res: Response<StandardResponse<any[]>>,
 ) => {
   try {
     console.log("Method getAllStrategiesByUser called");
-    const token: string = req.headers.authorization?.split(" ")[1] || "";
-    const claims = getClaimsFromToken(token);
-    const userId = claims.id;
 
-    if (!userId) {
-      return res.status(400).json({
+    const token: string | undefined = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: "User ID is required.",
+        message: "Unauthorized: Token is missing.",
       });
     }
 
+    const claims = getClaimsFromToken(token);
+    if (!claims || !claims.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Invalid token.",
+      });
+    }
+
+    const userId = claims.id;
     const strategies = await Strategy.findAll({ where: { userId } });
 
     // Fetch trades and calculate win rate concurrently
     const strategiesWithWinRate = await Promise.all(
-        strategies.map(async (strategy) => {
-          const trades = await Trade.findAll({ where: { strategyId: strategy.id } });
-          const totalTrades = trades.length;
-          const winningTrades = trades.filter(trade => trade.status === "win").length;
+      strategies.map(async (strategy) => {
+        const trades = await Trade.findAll({
+          where: { strategyId: strategy.id },
+        });
+        const totalTrades: number = trades.length;
+        const winningTrades = trades.filter(
+          (trade) => trade.status === "win",
+        ).length;
+        const winRate =
+          totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
 
-          const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
-          strategy.setDataValue("winRate", winRate.toFixed(2)); // Keep only 2 decimal places
-
-          return strategy;
-        })
+        return {
+          ...strategy.get(), // Convert to plain object
+          winRate: parseFloat(winRate.toFixed(2)), // Ensure numeric type
+          totalTrades,
+        };
+      }),
     );
 
     return res.status(200).json({
@@ -98,11 +114,10 @@ export const getAllStrategiesByUser = async (
   }
 };
 
-
 // Get a Strategy by ID
 export const getStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>
+  res: Response<StandardResponse<Strategy>>,
 ) => {
   try {
     const { id } = req.params;
@@ -131,7 +146,7 @@ export const getStrategyById = async (
 // Update a Strategy by ID
 export const updateStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>
+  res: Response<StandardResponse<Strategy>>,
 ) => {
   try {
     console.log("Method updateStrategyById called");
@@ -184,11 +199,10 @@ export const updateStrategyById = async (
   }
 };
 
-
 // Delete a Strategy by ID
 export const deleteStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<null>>
+  res: Response<StandardResponse<null>>,
 ) => {
   try {
     const { id } = req.params;
@@ -216,14 +230,13 @@ export const deleteStrategyById = async (
   }
 };
 
-
 // Endpoint to get trades by strategy id
 export const getAssociatedTrades = async (
-    req: Request,
-    res: Response<StandardResponse<any>>
+  req: Request,
+  res: Response<StandardResponse<any>>,
 ) => {
   try {
-    const {strategyId} = req.body;
+    const { strategyId } = req.body;
 
     // Fetch trades associated with the given strategyId
     const trades = await Trade.findAll({
@@ -236,7 +249,7 @@ export const getAssociatedTrades = async (
       return res.status(200).json({
         success: false,
         message: "No trades found for the given strategy ID.",
-        data:[]
+        data: [],
       });
     }
 

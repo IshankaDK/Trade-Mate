@@ -1,7 +1,7 @@
-import {Router} from "express";
+import { Router } from "express";
 
 import dotenv from "dotenv";
-import {login, register} from "../controller/auth.controller";
+import { login, register } from "../controller/auth.controller";
 
 dotenv.config();
 
