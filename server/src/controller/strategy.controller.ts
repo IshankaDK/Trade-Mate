@@ -50,36 +50,48 @@ export const createStrategy = async (
   }
 };
 // Get all Strategies
+
+
 export const getAllStrategiesByUser = async (
     req: Request,
-    res: Response<StandardResponse<Strategy[]>>
+    res: Response<StandardResponse<any[]>>
 ) => {
   try {
     console.log("Method getAllStrategiesByUser called");
-    const token: string = req.headers.authorization?.split(" ")[1] || "";
-    const claims = getClaimsFromToken(token);
-    const userId = claims.id;
 
-    if (!userId) {
-      return res.status(400).json({
+    const token: string | undefined = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: "User ID is required.",
+        message: "Unauthorized: Token is missing.",
       });
     }
 
+    const claims = getClaimsFromToken(token);
+    if (!claims || !claims.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Invalid token.",
+      });
+    }
+
+    const userId = claims.id;
     const strategies = await Strategy.findAll({ where: { userId } });
 
     // Fetch trades and calculate win rate concurrently
     const strategiesWithWinRate = await Promise.all(
         strategies.map(async (strategy) => {
           const trades = await Trade.findAll({ where: { strategyId: strategy.id } });
-          const totalTrades = trades.length;
+          const totalTrades: number = trades.length;
           const winningTrades = trades.filter(trade => trade.status === "win").length;
-
           const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
-          strategy.setDataValue("winRate", winRate.toFixed(2)); // Keep only 2 decimal places
 
-          return strategy;
+          return {
+            ...strategy.get(), // Convert to plain object
+            winRate: parseFloat(winRate.toFixed(2)), // Ensure numeric type
+            totalTrades,
+          };
         })
     );
 

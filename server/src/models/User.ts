@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import {DataTypes, Model} from "sequelize";
 import sequelize from "../config/db";
 
 class User extends Model {
@@ -15,6 +15,7 @@ class User extends Model {
   public postalCode!: string;
   public country!: string;
   public gender!: "MALE" | "FEMALE" | "OTHER";
+  public initial_capital!:number;
 }
 
 User.init(
@@ -79,6 +80,9 @@ User.init(
       type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
       allowNull: true,
     },
+      initial_capital: {
+          type: DataTypes.FLOAT
+      }
   },
   {
     sequelize,

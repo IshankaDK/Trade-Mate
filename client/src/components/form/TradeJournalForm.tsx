@@ -53,6 +53,7 @@ const TradeJournalForm = ({
     transactionCost: 0,
     reason: "",
     comment: "",
+    positionSize: 0,
   });
 
   const [currencies, setCurrencies] = useState<CurrencyDto[]>([]);
@@ -118,6 +119,7 @@ const TradeJournalForm = ({
   };
 
   const saveTrade = () => {
+    console.log(trade);
     APIClient.post("/trades", trade, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -136,7 +138,7 @@ const TradeJournalForm = ({
   };
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setTrade((prev) => ({
@@ -146,7 +148,8 @@ const TradeJournalForm = ({
         name === "exitPrice" ||
         name === "stopLossPrice" ||
         name === "takeProfitPrice" ||
-        name === "transactionCost"
+        name === "transactionCost" ||
+        name === "positionSize"
           ? parseFloat(value)
           : value,
     }));
@@ -177,12 +180,12 @@ const TradeJournalForm = ({
       } else if (close < open) {
         setDuration("Invalid duration");
         toast.error(
-          "Close Date must be later than Open Date. Please check the dates."
+          "Close Date must be later than Open Date. Please check the dates.",
         );
       } else {
         setDuration("Instant trade (Open and Close Dates are the same)");
         toast.warning(
-          "Open and Close Date are the same. Consider adjusting them."
+          "Open and Close Date are the same. Consider adjusting them.",
         );
       }
     }
@@ -193,15 +196,15 @@ const TradeJournalForm = ({
       const durationInMs = trade.duration;
       const days = Math.floor(durationInMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor(
-        (durationInMs % (1000 * 60 * 60)) / (1000 * 60)
+        (durationInMs % (1000 * 60 * 60)) / (1000 * 60),
       );
       const seconds = Math.floor((durationInMs % (1000 * 60)) / 1000);
 
       setDuration(
-        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
+        `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
       );
     } else {
       setDuration("N/A");
@@ -289,6 +292,11 @@ const TradeJournalForm = ({
       return false;
     }
 
+    if (!trade.positionSize || trade.positionSize <= 0) {
+      toast.error("Position Size must be a positive number.");
+      return false;
+    }
+
     return true;
   };
 
@@ -315,6 +323,7 @@ const TradeJournalForm = ({
       transactionCost: 0,
       reason: "",
       comment: "",
+      positionSize: 0,
     });
     setDuration("");
     setSelectedCategories([]);
@@ -396,37 +405,37 @@ const TradeJournalForm = ({
                   ))}
                 </TextField>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Status */}
-                <TextField
-                  name="status"
-                  label="Status"
-                  select
-                  fullWidth
-                  required
-                  size="small"
-                  value={trade.status}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="win">Win</MenuItem>
-                  <MenuItem value="loss">Loss</MenuItem>
-                  <MenuItem value="breakeven">Breakeven</MenuItem>
-                </TextField>
-                {/* Trade Type */}
-                <TextField
-                  name="type"
-                  label="Trade Type"
-                  select
-                  fullWidth
-                  required
-                  size="small"
-                  value={trade.type}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="buy">Buy</MenuItem>
-                  <MenuItem value="sell">Sell</MenuItem>
-                </TextField>
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Status */}
+                  <TextField
+                    name="status"
+                    label="Status"
+                    select
+                    fullWidth
+                    required
+                    size="small"
+                    value={trade.status}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="win">Win</MenuItem>
+                    <MenuItem value="loss">Loss</MenuItem>
+                    <MenuItem value="breakeven">Breakeven</MenuItem>
+                  </TextField>
+                  {/* Trade Type */}
+                  <TextField
+                    name="type"
+                    label="Trade Type"
+                    select
+                    fullWidth
+                    required
+                    size="small"
+                    value={trade.type}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="buy">Buy</MenuItem>
+                    <MenuItem value="sell">Sell</MenuItem>
+                  </TextField>
+                </div>
 
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 mb-2">
@@ -455,11 +464,11 @@ const TradeJournalForm = ({
                 </div>
               </div>
 
-              <div className="space-y-3 border">
+              <div className="space-y-3">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Additional Information
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   {/* Entry Price */}
                   <TextField
                     name="entryPrice"
@@ -482,6 +491,18 @@ const TradeJournalForm = ({
                     required
                     inputProps={{ step: "0.01" }}
                     value={trade.exitPrice}
+                    onChange={handleChange}
+                  />
+
+                  <TextField
+                    name="positionSize"
+                    label="Position Size"
+                    type="number"
+                    fullWidth
+                    size="small"
+                    required
+                    inputProps={{ step: "0.01" }}
+                    value={trade.positionSize}
                     onChange={handleChange}
                   />
                 </div>

@@ -26,7 +26,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
   const [formData, setFormData] = useState<UserDto>(user);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [countryList, setCountryList] = useState<any>([]);
-  
+
   const genderOptions = [
     { value: "MALE", label: "Male" },
     { value: "FEMALE", label: "Female" },
@@ -77,6 +77,13 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       errors.dateOfBirth = "Invalid Date of Birth";
     }
 
+    if (
+      formData.initial_capital === undefined ||
+      formData.initial_capital === null
+    ) {
+      errors.initialCapital = "Initial Capital is required";
+    }
+
     return errors;
   };
 
@@ -99,6 +106,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       postalCode: formData.postalCode,
       country: formData.country,
       gender: formData.gender,
+      initialCapital: formData.initial_capital,
     };
 
     APIClient.patch("/users", formDataToSubmit, {
@@ -128,7 +136,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -306,7 +314,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
             <Select
               options={genderOptions}
               value={genderOptions.find(
-                (option) => option.value === formData.gender
+                (option) => option.value === formData.gender,
               )}
               onChange={handleGenderChange}
               placeholder="Select Gender"
@@ -314,6 +322,20 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
             {errors.gender && (
               <div style={{ color: "red" }}>{errors.gender}</div>
             )}
+          </Box>
+          <Box sx={{ marginBottom: 2 }}>
+            <TextField
+              label="Initial Capital"
+              size="small"
+              type="number"
+              name="initialCapital"
+              value={formData.initial_capital}
+              onChange={handleChange}
+              fullWidth
+              required
+              error={!!errors.initialCapital}
+              helperText={errors.initialCapital}
+            />
           </Box>
 
           <Box>

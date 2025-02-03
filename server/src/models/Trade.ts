@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import {DataTypes, Model} from "sequelize";
 import sequelize from "../config/db";
 
 class Trade extends Model {
@@ -19,7 +19,7 @@ class Trade extends Model {
   public entryPrice!: number;
   public exitPrice!: number;
 
-  public positionSize!: string;
+  public positionSize!: number;
   public marketTrend!: string;
 
   public stopLossPrice!: number;
@@ -28,6 +28,7 @@ class Trade extends Model {
 
   public reason!: string;
   public comment!: string;
+  public profit!: number;
 
   public categories!: string[]; // Categories as an array of strings
 }
@@ -116,6 +117,11 @@ Trade.init(
       type: DataTypes.JSON, // Store categories as JSON
       allowNull: true,
     },
+    profit: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    }
   },
   {
     sequelize,

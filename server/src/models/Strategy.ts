@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import {DataTypes, Model} from "sequelize";
 import sequelize from "../config/db";
 
 class Strategy extends Model {
@@ -27,6 +27,7 @@ class Strategy extends Model {
   public lastModifiedDate!: Date;
   public userId!: number;
   public starRate!: number;
+
 }
 
 Strategy.init(

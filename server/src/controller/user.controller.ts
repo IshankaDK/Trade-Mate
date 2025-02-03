@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 import User from "../models/User";
-import { getClaimsFromToken } from "../utils/Jwt.utils";
+import {getClaimsFromToken} from "../utils/Jwt.utils";
 
 export const getUserDetails = async (req: Request, res: Response) => {
   try {
@@ -32,6 +32,8 @@ export const getUserDetails = async (req: Request, res: Response) => {
         "postalCode",
         "country",
         "gender",
+          "initial_capital"
+
       ],
     });
 
@@ -97,6 +99,7 @@ export const updateUserDetails = async (req: Request, res: Response) => {
       postalCode,
       country,
       gender,
+      initial_capital
     } = req.body;
 
     user.firstName = firstName || user.firstName;
@@ -109,6 +112,7 @@ export const updateUserDetails = async (req: Request, res: Response) => {
     user.postalCode = postalCode || user.postalCode;
     user.country = country || user.country;
     user.gender = gender || user.gender;
+    user.initial_capital = initial_capital || user.initial_capital;
 
     await user.save();
 
