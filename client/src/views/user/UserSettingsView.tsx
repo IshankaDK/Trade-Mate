@@ -76,7 +76,7 @@ export const UserSettingsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Total Profit */}
+        {/* Total Profit 
         <div className="mb-6 border rounded p-4 bg-gray-50 shadow-sm">
           <h1 className="text-sm font-semibold text-gray-500 tracking-wide">
             Total Profit
@@ -86,7 +86,7 @@ export const UserSettingsView: React.FC = () => {
           </h1>
           <p className="text-gray-600 text-sm">{date}</p>
         </div>
-
+*/}
         {/* Currency Pair View */}
         <div className="mb-6 border rounded p-4 bg-gray-50 shadow-sm">
           <CurrencyPairView />
