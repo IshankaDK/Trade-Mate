@@ -10,12 +10,12 @@ import User from "../models/User";
 // Create a Trade
 export const saveTrade = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>,
+  res: Response<StandardResponse<Trade>>
 ) => {
   try {
     let tradeData = req.body;
     tradeData.userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || "",
+      req.headers.authorization?.split(" ")[1] || ""
     ).id;
     console.log("tradeData", tradeData);
 
@@ -43,7 +43,7 @@ export const saveTrade = async (
 // Get all Trades by User
 export const getAllTradesByUser = async (
   req: Request,
-  res: Response<StandardResponse<Trade[]>>,
+  res: Response<StandardResponse<Trade[]>>
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -73,7 +73,7 @@ export const getAllTradesByUser = async (
 // Get a Trade by ID
 export const getTradeById = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>,
+  res: Response<StandardResponse<Trade>>
 ) => {
   try {
     const { id } = req.params;
@@ -107,7 +107,7 @@ export const getTradeById = async (
 // Delete a Trade by ID
 export const deleteTradeById = async (
   req: Request,
-  res: Response<StandardResponse<null>>,
+  res: Response<StandardResponse<null>>
 ) => {
   try {
     const { id } = req.params;
@@ -143,7 +143,7 @@ const calculateGeneralStats = (trades: Trade[]) => {
   const lossTrades = trades.filter((trade) => trade.status === "loss").length;
 
   const totalProfit = trades.reduce((sum, trade) => {
-    const profit = trade.exitPrice - trade.entryPrice;
+    const profit = (trade.exitPrice - trade.entryPrice) * trade.positionSize;
     return sum + (trade.status === "win" ? profit : -Math.abs(profit));
   }, 0);
 
@@ -164,7 +164,7 @@ const calculateMonthlyStats = (trades: Trade[]) => {
 
   trades.forEach((trade) => {
     const tradeMonth = new Date(trade.closeDate).toISOString().slice(0, 7); // YYYY-MM
-    const profit = trade.exitPrice - trade.entryPrice;
+    const profit = (trade.exitPrice - trade.entryPrice) * trade.positionSize;
 
     if (!monthlyStats[tradeMonth]) {
       monthlyStats[tradeMonth] = { profit: 0, loss: 0 };
@@ -199,7 +199,7 @@ const getTotalStrategyCount = async (userId: number): Promise<number> => {
 
 // Helper method to get the most profitable strategy
 const getProfitableStrategy = async (
-  userId: number,
+  userId: number
 ): Promise<{ strategyId: number; totalProfit: number } | null> => {
   try {
     const trades = await Trade.findAll({
@@ -270,8 +270,9 @@ const getHighestLossTradeProfit = async (userId: number) => {
     order: [["profit", "ASC"]],
     attributes: ["profit"],
   });
-
-  return highestLossTrade ? highestLossTrade.profit : 0;
+  return highestLossTrade && highestLossTrade?.profit < 0
+    ? highestLossTrade?.profit
+    : 0;
 };
 
 //get strategy name with it
@@ -323,9 +324,11 @@ const calculateNetDailyPL = async (userId: number, date: Date) => {
 
     trades.forEach((trade) => {
       if (trade.status === "win") {
-        totalDailyProfits += trade.exitPrice - trade.entryPrice;
+        totalDailyProfits +=
+          (trade.exitPrice - trade.entryPrice) * trade.positionSize;
       } else if (trade.status === "loss") {
-        totalDailyLosses += trade.entryPrice - trade.exitPrice;
+        totalDailyLosses +=
+          (trade.entryPrice - trade.exitPrice) * trade.positionSize;
       }
     });
 
@@ -390,7 +393,7 @@ const getDrawDownRatio = async (userId: number) => {
           Sequelize.fn(
             "COALESCE",
             Sequelize.fn("SUM", Sequelize.col("profit")),
-            0,
+            0
           ),
           "totalProfitBeforeLoss",
         ],
@@ -582,7 +585,7 @@ const getProfitLoss = async (userId: number) => {
 // Endpoint to get User's Trade Statistics
 export const getUserTradeStats = async (
   req: Request,
-  res: Response<StandardResponse<any>>,
+  res: Response<StandardResponse<any>>
 ) => {
   try {
     console.log("Method getUserTradeStats called");
@@ -679,7 +682,7 @@ const getEquityCurve = async (userId: number, initialBalance: number) => {
 
 const getMonthlyEquityCurve = async (
   userId: number,
-  initialBalance: number,
+  initialBalance: number
 ) => {
   const equityCurve = await getEquityCurve(userId, initialBalance);
 
@@ -711,7 +714,7 @@ const getMonthlyEquityCurve = async (
 // Endpoint to get User's Monthly Equity Curve
 export const getUserEquityCurve = async (
   req: Request,
-  res: Response<StandardResponse<any>>,
+  res: Response<StandardResponse<any>>
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -728,7 +731,7 @@ export const getUserEquityCurve = async (
 
     const monthlyEquityCurve = await getMonthlyEquityCurve(
       userId,
-      initialBalance || 0,
+      initialBalance || 0
     );
 
     console.log("Monthly equity curve:", monthlyEquityCurve);
