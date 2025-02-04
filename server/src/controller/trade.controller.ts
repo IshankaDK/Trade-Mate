@@ -19,10 +19,37 @@ export const saveTrade = async (
     ).id;
     console.log("tradeData", tradeData);
 
+    const calculateProfit = (
+      entryPrice: number,
+      exitPrice: number,
+      positionSize: number,
+      status: string,
+      type: string
+    ) => {
+      if (type === "buy") {
+        if (status === "win") {
+          return (exitPrice - entryPrice) * (positionSize / entryPrice);
+        } else {
+          return (exitPrice - entryPrice) * (positionSize / entryPrice);
+        }
+      } else {
+        if (status === "win") {
+          return (entryPrice - exitPrice) * (positionSize / entryPrice);
+        } else {
+          return (exitPrice - entryPrice) * (positionSize / entryPrice);
+        }
+      }
+    };
+
     tradeData = {
       ...tradeData,
-      profit:
-        (tradeData.exitPrice - tradeData.entryPrice) * tradeData.positionSize,
+      profit: calculateProfit(
+        tradeData.entryPrice,
+        tradeData.exitPrice,
+        tradeData.positionSize,
+        tradeData.status,
+        tradeData.type
+      ),
     };
 
     const trade = await Trade.create(tradeData);
@@ -143,7 +170,7 @@ const calculateGeneralStats = (trades: Trade[]) => {
   const lossTrades = trades.filter((trade) => trade.status === "loss").length;
 
   const totalProfit = trades.reduce((sum, trade) => {
-    const profit = (trade.exitPrice - trade.entryPrice) * trade.positionSize;
+    const profit = trade.profit;
     return sum + (trade.status === "win" ? profit : -Math.abs(profit));
   }, 0);
 
@@ -164,7 +191,7 @@ const calculateMonthlyStats = (trades: Trade[]) => {
 
   trades.forEach((trade) => {
     const tradeMonth = new Date(trade.closeDate).toISOString().slice(0, 7); // YYYY-MM
-    const profit = (trade.exitPrice - trade.entryPrice) * trade.positionSize;
+    const profit = trade.profit;
 
     if (!monthlyStats[tradeMonth]) {
       monthlyStats[tradeMonth] = { profit: 0, loss: 0 };
@@ -324,11 +351,9 @@ const calculateNetDailyPL = async (userId: number, date: Date) => {
 
     trades.forEach((trade) => {
       if (trade.status === "win") {
-        totalDailyProfits +=
-          (trade.exitPrice - trade.entryPrice) * trade.positionSize;
+        totalDailyProfits += trade.profit;
       } else if (trade.status === "loss") {
-        totalDailyLosses +=
-          (trade.entryPrice - trade.exitPrice) * trade.positionSize;
+        totalDailyLosses += Math.abs(trade.profit);
       }
     });
 
