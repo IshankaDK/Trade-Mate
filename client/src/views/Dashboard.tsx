@@ -29,7 +29,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
+  Filler
 );
 
 interface TradeData {
@@ -250,7 +250,7 @@ export const Dashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Total Profit</p>
                   <p className="text-xl font-bold text-gray-800">
-                    ${stats?.totalProfit || "0.00"}
+                    ${Number(stats?.totalProfit)?.toFixed(2) || "0.00"}
                   </p>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export const Dashboard = () => {
                 <p className="text-sm text-gray-500">Daily P/L</p>
                 <div className="flex items-baseline space-x-2">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    ${stats?.dailyPL || "0.00"}
+                    ${Number(stats?.dailyPL)?.toFixed(2) || "0.00"}
                   </h3>
                   <span className="text-xs text-gray-500">Last 10 trades</span>
                 </div>
