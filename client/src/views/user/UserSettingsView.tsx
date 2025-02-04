@@ -56,7 +56,7 @@ export const UserSettingsView: React.FC = () => {
   }, []);
 
   return (
-    <div className="m-2 grid lg:grid-cols-4  rounded bg-gray-50/50">
+    <div className="m-2 grid lg:grid-cols-4  rounded bg-gray-50/50 min-h-screen ">
       {/* Sidebar */}
       <aside className="w-full  sm:my-4 lg:w-[300px] border-b lg:border-b-0 bg-white p-6 shadow-lg">
         {/* User Info */}

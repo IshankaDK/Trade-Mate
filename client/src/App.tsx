@@ -13,6 +13,7 @@ import { UserSettingsView } from "./views/user/UserSettingsView.tsx";
 import { Dashboard } from "./views/Dashboard.tsx";
 import { PlaybookView } from "./views/playbook/PlaybookView.tsx";
 import JournalView from "./views/journal/JournalView.tsx";
+import Footer from "./components/footer/Footer.tsx";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -24,6 +25,7 @@ const Layout: React.FC = () => {
     <div className="px-6 lg:px-[10vw] py-4">
       {!hideNavBar && <NavBar />}
       <Outlet />
+      <Footer />
     </div>
   );
 };

@@ -138,7 +138,7 @@ export const Dashboard = () => {
   useEffect(() => {}, []);
 
   // ---------------------------------------------------------------------------
-  const PRIMARY_COLOR = "#6577FE";
+  const PRIMARY_COLOR = "#3b82f6";
   const BACKGROUND_COLOR = "rgba(101, 119, 254, 0.2)";
   const chartData: ChartData<"line"> = {
     labels: data.map((item) => item.x),
@@ -200,8 +200,8 @@ export const Dashboard = () => {
       datasets: [
         {
           data: [stats?.winTrades || 0, stats?.lossTrades || 0], // Sample win/loss data
-          backgroundColor: ["#36A2EB", "#FF6384"],
-          hoverBackgroundColor: ["#36A2EB", "#FF6384"],
+          backgroundColor: ["#3b82f6", "#FF6384"],
+          hoverBackgroundColor: ["#3b82f6", "#FF6384"],
         },
       ],
     };
@@ -226,7 +226,7 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Container */}
-      <div className="max-w-[2000px] mx-auto p-6 space-y-6">
+      <div className=" mx-auto p-6 space-y-6">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-xl p-6 shadow-sm">
           <div className="space-y-2">
@@ -339,13 +339,13 @@ export const Dashboard = () => {
           {/* Left Column - Charts */}
           <div className="lg:col-span-2 space-y-6">
             {/* Equity Curve */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-6 ">
                 <h2 className="text-xl font-bold text-gray-800">
                   Equity Curve
                 </h2>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">Last 30 days</span>
+                  {/*<span className="text-sm text-gray-500">Last 30 days</span>*/}
                 </div>
               </div>
               <div className="h-[400px]">
@@ -356,7 +356,7 @@ export const Dashboard = () => {
             {/* Trading Statistics Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {/* Risk to Reward */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">Risk/Reward</p>
                 <p className="text-xl font-bold mt-1">
                   {stats?.riskToRewardRatio?.toFixed(2) || "0.00"}
@@ -364,7 +364,7 @@ export const Dashboard = () => {
               </div>
 
               {/* Highest Win */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">Highest Win</p>
                 <p className="text-xl font-bold mt-1 text-green-600">
                   ${stats?.highestWinTrade?.toFixed(2) || "0.00"}
@@ -372,18 +372,18 @@ export const Dashboard = () => {
               </div>
 
               {/* Highest Loss */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">Highest Loss</p>
                 <p className="text-xl font-bold mt-1 text-red-600">
                   ${stats?.highestLossTrade?.toFixed(2) || "0.00"}
                 </p>
               </div>
 
-              {/* Risk to Reward */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
+              {/* Total Currencies */}
+              <div className="bg-white rounded-xl p-4 shadow-sm  hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">Total Currencies</p>
                 <p className="text-xl font-bold mt-1">
-                  {stats?.totalCurrencyPairsCount?.toFixed(2) || "0.00"}
+                  {stats?.totalCurrencyPairsCount || "0"}
                 </p>
               </div>
             </div>
@@ -393,7 +393,7 @@ export const Dashboard = () => {
           <div className="space-y-6">
             {/* Most Profitable Strategy */}
             {stats?.mostProfitableStrategy && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-800">
                     Top Strategy
@@ -412,8 +412,7 @@ export const Dashboard = () => {
             )}
 
             {/* Win/Loss Distribution */}
-
-            <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-4">
                 Win/Loss Distribution
               </h2>
@@ -423,7 +422,7 @@ export const Dashboard = () => {
             </div>
 
             {/* Average Holding Period */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-800">
                   Holding Period
