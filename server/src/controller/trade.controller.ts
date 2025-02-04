@@ -456,6 +456,128 @@ const getRiskToRewardRatio = async (userId: number) => {
   // Risk-to-Reward Ratio = (avg loss per trade / avg win per trade) * 100
   return (avgLoss / avgWin) * 100;
 };
+// Helper method to calculate the win/loss ratio for a user for each month
+const getWinLossRatio = async (userId: number) => {
+  try {
+    const trades = await Trade.findAll({
+      where: { userId },
+      attributes: ["profit", "openDate"], // Include creation date to group by month
+      raw: true,
+    });
+
+    if (!trades.length) return { winLossRatio: [] }; // No trades found
+
+    const monthlyStats: { [key: string]: { wins: number; losses: number } } =
+      {};
+
+    trades.forEach((trade) => {
+      const monthYear = new Date(trade.openDate).toISOString().slice(0, 7); // Format to YYYY-MM
+      if (!monthlyStats[monthYear]) {
+        monthlyStats[monthYear] = { wins: 0, losses: 0 };
+      }
+
+      if (trade.profit > 0) {
+        monthlyStats[monthYear].wins += 1;
+      } else {
+        monthlyStats[monthYear].losses += 1;
+      }
+    });
+
+    const winLossRatio = Object.keys(monthlyStats).map((month) => {
+      const { wins, losses } = monthlyStats[month];
+      return {
+        month,
+        winLossRatio: (wins / (losses || 1)).toFixed(2),
+      };
+    });
+
+    return { winLossRatio };
+  } catch (error) {
+    console.error("Error calculating win/loss ratio:", error);
+    return { winLossRatio: [] };
+  }
+};
+
+// Helper method to calculate average trade duration for a user for each month
+const getTradeDuration = async (userId: number) => {
+  try {
+    const trades = await Trade.findAll({
+      where: { userId },
+      attributes: ["openDate", "closeDate"], // Include creation date for month grouping
+      raw: true,
+    });
+
+    if (!trades.length) return { averageTradeDuration: [] }; // No trades found
+
+    const monthlyStats: { [key: string]: number[] } = {};
+
+    trades.forEach((trade) => {
+      const monthYear = new Date(trade.openDate).toISOString().slice(0, 7); // Format to YYYY-MM
+      if (!monthlyStats[monthYear]) {
+        monthlyStats[monthYear] = [];
+      }
+
+      if (trade.openDate && trade.closeDate) {
+        const openDate = new Date(trade.openDate);
+        const closeDate = new Date(trade.closeDate);
+        const duration =
+          (closeDate.getTime() - openDate.getTime()) / (1000 * 60 * 60 * 24); // Duration in days
+        monthlyStats[monthYear].push(duration);
+      }
+    });
+
+    const averageTradeDuration = Object.keys(monthlyStats).map((month) => {
+      const durations = monthlyStats[month];
+      const averageDuration =
+        durations.reduce((a, b) => a + b, 0) / durations.length;
+      return {
+        month,
+        averageTradeDuration: averageDuration.toFixed(2),
+      };
+    });
+
+    return { averageTradeDuration };
+  } catch (error) {
+    console.error("Error calculating average trade duration:", error);
+    return { averageTradeDuration: [] };
+  }
+};
+
+// Helper method to calculate the total profit/loss for a user by each month
+const getProfitLoss = async (userId: number) => {
+  try {
+    const trades = await Trade.findAll({
+      where: { userId },
+      attributes: ["profit", "openDate"], // Include creation date to group by month
+      raw: true,
+    });
+
+    if (!trades.length) return { totalProfitLoss: [] }; // No trades found
+
+    const monthlyStats: { [key: string]: number } = {};
+
+    trades.forEach((trade) => {
+      const monthYear = new Date(trade.openDate).toISOString().slice(0, 7); // Format to YYYY-MM
+      if (!monthlyStats[monthYear]) {
+        monthlyStats[monthYear] = 0;
+      }
+
+      monthlyStats[monthYear] += trade.profit;
+    });
+
+    const totalProfitLoss = Object.keys(monthlyStats).map((month) => {
+      return {
+        month,
+        totalProfitLoss: monthlyStats[month].toFixed(2),
+      };
+    });
+
+    return { totalProfitLoss };
+  } catch (error) {
+    console.error("Error calculating total profit/loss:", error);
+    return { totalProfitLoss: [] };
+  }
+};
 
 // Endpoint to get User's Trade Statistics
 export const getUserTradeStats = async (
@@ -484,6 +606,10 @@ export const getUserTradeStats = async (
     const riskToRewardRatio = await getRiskToRewardRatio(userId);
     const drawDownRatio = await getDrawDownRatio(userId);
 
+    const winLossRatio = await getWinLossRatio(userId);
+    const tradeDuration = await getTradeDuration(userId);
+    const profitLoss = await getProfitLoss(userId);
+
     const data = {
       totalTrades: generalStats.totalTrades,
       winTrades: generalStats.winTrades,
@@ -500,6 +626,9 @@ export const getUserTradeStats = async (
       mostProfitableStrategy,
       riskToRewardRatio,
       drawDownRatio,
+      winLossRatio,
+      tradeDuration,
+      profitLoss,
     };
     console.log(data);
 

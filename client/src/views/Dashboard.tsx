@@ -1,8 +1,11 @@
-import { Line } from "react-chartjs-2";
+import { Doughnut, Line } from "react-chartjs-2";
 import {
+  ArcElement,
   BarElement,
   CategoryScale,
   Chart as ChartJS,
+  ChartData,
+  ChartOptions,
   Filler,
   Legend,
   LinearScale,
@@ -12,12 +15,12 @@ import {
   Tooltip,
 } from "chart.js";
 import { BarChart, Info, Star, TrendingUp } from "lucide-react";
-import { Equalizer } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import APIClient from "../util/APIClient";
 import { UserDto } from "../types/UserDto.ts";
 
 ChartJS.register(
+  ArcElement,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -33,6 +36,7 @@ interface TradeData {
   tradeId: number;
   profit: number;
 }
+
 interface MonthlyProfits {
   month: string;
   profit: number;
@@ -133,36 +137,78 @@ export const Dashboard = () => {
 
   useEffect(() => {}, []);
 
-  const chartData = {
+  // ---------------------------------------------------------------------------
+  const PRIMARY_COLOR = "#6577FE";
+  const BACKGROUND_COLOR = "rgba(101, 119, 254, 0.2)";
+  const chartData: ChartData<"line"> = {
     labels: data.map((item) => item.x),
     datasets: [
       {
         label: "Equity Curve ($)",
         data: data.map((item) => item.y),
-        borderColor: "#6577FE",
-        backgroundColor: "rgba(101, 119, 254, 0.2)",
+        borderColor: PRIMARY_COLOR,
+        backgroundColor: BACKGROUND_COLOR,
         fill: true,
-        tension: 0.2,
+        tension: 0.2, // Smooth curve
+        pointRadius: 3, // Makes points visible
+        pointHoverRadius: 5,
       },
     ],
   };
-
-  const commonOptions = {
+  const commonOptions: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "top" },
+      legend: {
+        position: "top",
+        labels: {
+          font: { size: 14 },
+          color: "#333",
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => `$${context.raw}`,
+        },
+      },
     },
     scales: {
       x: {
-        grid: { display: false },
+        grid: { display: true },
+        ticks: {
+          font: { size: 12 },
+        },
       },
       y: {
-        grid: { display: true },
         beginAtZero: true,
+        grid: { display: true },
+        ticks: {
+          callback: (value: any) => `$${value}`,
+          font: { size: 12 },
+        },
       },
     },
   };
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+
+  const [wlData, setWlData] = useState<any>();
+  useEffect(() => {
+    const donutData = {
+      labels: ["Wins", "Losses"],
+      datasets: [
+        {
+          data: [stats?.winTrades || 0, stats?.lossTrades || 0], // Sample win/loss data
+          backgroundColor: ["#36A2EB", "#FF6384"],
+          hoverBackgroundColor: ["#36A2EB", "#FF6384"],
+        },
+      ],
+    };
+    setWlData(donutData);
+  }, [stats]);
+
+  // ---------------------------------------------------------------------------
 
   function greet(): string {
     const hours = new Date().getHours();
@@ -178,258 +224,239 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen py-[1vw]">
-      <div className="flex items-center justify-between  p-[1.5vw] rounded-lg shadow-sm">
-        {/* Greeting Message */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            {greet()}
-            <span className="text-blue-600 ml-2">
-              {user && user.firstName ? user.firstName : ""}
-            </span>{" "}
-            👋
-          </h1>
-          <p className="text-gray-600 mt-[0.5vw]">
-            Analyze your trading performance and stay on top of your goals.
-          </p>
-        </div>
-
-        {/* Profile/Quick Stats Section */}
-        {/*<div className="flex items-center space-x-[1vw]">*/}
-        {/*  <div className="text-gray-700">*/}
-        {/*    <p className="font-semibold">Today's Performance</p>*/}
-        {/*    <p className="text-sm">*/}
-        {/*      Net Profit:{" "}*/}
-        {/*      <span className="text-green-600 font-medium">+$450</span>*/}
-        {/*    </p>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-      </div>
-
-      <div className="mt-2 grid grid-cols-1 lg:grid-cols-4 gap-[2vw]">
-        <div className="grid grid-cols-1 col-span-4 md:grid-cols-2 lg:grid-cols-4 gap-[2vw]">
-          {/* Total Balance Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Total Balance</h3>
-              <TrendingUp className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-green-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{stats?.totalProfit}</div>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Main Container */}
+      <div className="max-w-[2000px] mx-auto p-6 space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-xl p-6 shadow-sm">
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              {greet()}
+              <span className="text-blue-600 ml-2">
+                {user && user.firstName ? user.firstName : ""}
+              </span>
+              <span className="ml-2">👋</span>
+            </h1>
+            <p className="text-gray-600">
+              Analyze your trading performance and stay on top of your goals.
+            </p>
           </div>
-
-          {/* Strategies Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Strategies</h3>
-              <Info className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-purple-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {stats?.totalStrategyCount ? stats.totalStrategyCount : 0}
+          <div className="mt-4 md:mt-0">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-blue-500 rounded-full p-2">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Profit</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    ${stats?.totalProfit || "0.00"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Win/Loss Ratio Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Win/Loss Ratio</h3>
-              <TrendingUp className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-green-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {stats?.winTrades}/{stats?.lossTrades}
+        {/* Quick Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Win/Loss Card */}
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">Win/Loss Ratio</p>
+                <div className="flex items-baseline space-x-2">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {stats?.winTrades}/{stats?.lossTrades}
+                  </h3>
+                  <span className="text-sm text-green-500">
+                    {stats?.winTrades &&
+                      (
+                        (stats?.winTrades / (stats?.totalTrades || 1)) *
+                        100
+                      ).toFixed(1)}
+                    %
+                  </span>
+                </div>
+              </div>
+              <div className="bg-green-100 rounded-full p-3">
+                <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </div>
 
           {/* Trade Volume Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Trade Volume</h3>
-              <BarChart className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-blue-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {`${stats?.totalTrades} Trades`}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {/* 12 trades this month */}
-              </p>
-            </div>
-          </div>
-
-          {/* Highest Win Trade Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Highest Win Trade</h3>
-              <TrendingUp className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-green-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {stats?.highestWinTrade?.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                From your last successful trade
-              </p>
-            </div>
-          </div>
-
-          {/* Highest Loss Trade Card */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Highest Loss Trade</h3>
-              <TrendingUp className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-red-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {stats?.highestLossTrade?.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                From your last unsuccessful trade
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Saved Currency Pairs</h3>
-              <Equalizer className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-orange-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {stats?.totalCurrencyPairsCount
-                  ? stats?.totalCurrencyPairsCount
-                  : 0}{" "}
-                Pairs
-              </div>
-            </div>
-          </div>
-
-          {/* Most Profitable Strategy Card */}
-          {stats?.mostProfitableStrategy && (
-            <div className="bg-white shadow-lg rounded-lg p-4">
-              <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="text-sm font-medium">
-                  Most Profitable Strategy
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">Trade Volume</p>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  {stats?.totalTrades} Trades
                 </h3>
-                <Star className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-yellow-500" />
               </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {stats?.mostProfitableStrategy?.strategy.name}
+              <div className="bg-blue-100 rounded-full p-3">
+                <BarChart className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Daily P/L Card */}
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">Daily P/L</p>
+                <div className="flex items-baseline space-x-2">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    ${stats?.dailyPL || "0.00"}
+                  </h3>
+                  <span className="text-xs text-gray-500">Last 10 trades</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  USD {stats?.mostProfitableStrategy?.totalProfit.toFixed(2)}
+              </div>
+              <div className="bg-purple-100 rounded-full p-3">
+                <Star className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Strategies Card */}
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">Active Strategies</p>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  {stats?.totalStrategyCount || 0}
+                </h3>
+              </div>
+              <div className="bg-orange-100 rounded-full p-3">
+                <Info className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Charts */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Equity Curve */}
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Equity Curve
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">Last 30 days</span>
+                </div>
+              </div>
+              <div className="h-[400px]">
+                <Line data={chartData} options={commonOptions} />
+              </div>
+            </div>
+
+            {/* Trading Statistics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Risk to Reward */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-gray-500">Risk/Reward</p>
+                <p className="text-xl font-bold mt-1">
+                  {stats?.riskToRewardRatio?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+
+              {/* Highest Win */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-gray-500">Highest Win</p>
+                <p className="text-xl font-bold mt-1 text-green-600">
+                  ${stats?.highestWinTrade?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+
+              {/* Highest Loss */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-gray-500">Highest Loss</p>
+                <p className="text-xl font-bold mt-1 text-red-600">
+                  ${stats?.highestLossTrade?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+
+              {/* Risk to Reward */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-gray-500">Total Currencies</p>
+                <p className="text-xl font-bold mt-1">
+                  {stats?.totalCurrencyPairsCount?.toFixed(2) || "0.00"}
                 </p>
               </div>
             </div>
-          )}
+          </div>
 
-          {stats?.riskToRewardRatio && (
-            <div className="bg-white shadow-lg rounded-lg p-4">
-              <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="text-sm font-medium">Risk to Reward</h3>
-                <Info className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-purple-500" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {stats?.riskToRewardRatio
-                    ? stats.riskToRewardRatio.toFixed(3)
-                    : 0.0}{" "}
-                  %
+          {/* Right Column - Additional Stats */}
+          <div className="space-y-6">
+            {/* Most Profitable Strategy */}
+            {stats?.mostProfitableStrategy && (
+              <div className="bg-white rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Top Strategy
+                  </h3>
+                  <Star className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats.mostProfitableStrategy.strategy.name}
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    ${stats.mostProfitableStrategy.totalProfit.toFixed(2)}
+                  </p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* averageHoldingPeriod */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Average Holding Period</h3>
-              <Star className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-yellow-500" />
-            </div>
-            <div className="flex space-x-2 mb-2">
-              <button
-                onClick={() => handleToggle("days")}
-                className={`px-1 py-0.5 text-xs rounded-lg ${isDays ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
-              >
-                Days
-              </button>
-              <button
-                onClick={() => handleToggle("minutes")}
-                className={`px-1 py-0.5 text-xs rounded-lg ${!isDays ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
-              >
-                Minutes
-              </button>
+            {/* Win/Loss Distribution */}
+
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Win/Loss Distribution
+              </h2>
+              <div className="h-[300px]">
+                {wlData ? <Doughnut data={wlData} /> : <p>Loading...</p>}
+              </div>
             </div>
 
-            <div>
-              <div className="text-2xl font-bold">
+            {/* Average Holding Period */}
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-800">
+                  Holding Period
+                </h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleToggle("days")}
+                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                      isDays
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Days
+                  </button>
+                  <button
+                    onClick={() => handleToggle("minutes")}
+                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                      !isDays
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Minutes
+                  </button>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-800">
                 {isDays
                   ? `${((stats?.averageHoldingPeriod ?? 0) / 24 / 60).toFixed(1)} Days`
                   : `${stats?.averageHoldingPeriod} Minutes`}
-              </div>
-            </div>
-          </div>
-
-          {/* Daily P/L */}
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium">Daily P/L</h3>
-              <Star className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-yellow-500" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{stats?.dailyPL}</div>
-              <p className="text-xs text-muted-foreground">
-                Daily P/L for last 10 trades
               </p>
             </div>
-          </div>
-
-          {stats?.drawDownRatio && (
-            <div className="bg-white shadow-lg rounded-lg p-4">
-              <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="text-sm font-medium">Draw Down Ratio</h3>
-                <Info className="w-[1.5vw] h-[1.5vw] mr-[0.5vw] text-purple-500" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {stats?.drawDownRatio ? stats.drawDownRatio.toFixed(2) : 0.0}{" "}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/*Charts*/}
-        <div className="p-[1.5vw] bg-white shadow rounded-lg col-span-2">
-          <h2 className="text-[1.2vw] font-semibold text-gray-700 mb-[1vw]">
-            Equity Curve
-          </h2>
-          <div className="h-[25vw]">
-            {/*@ts-ignore*/}
-            <Line data={chartData} options={commonOptions} />
-          </div>
-        </div>
-        <div className="p-[1.5vw] bg-white shadow rounded-lg">
-          <h2 className="text-[1.2vw] font-semibold text-gray-700 mb-[1vw]">
-            Position Size Ratio
-          </h2>
-          <div className="h-[25vw]">
-            {/*@ts-ignore*/}
-            {/* <Bar data={chartData2} options={commonOptions} /> */}
-          </div>
-        </div>
-        <div className="p-[1.5vw] bg-white shadow rounded-lg">
-          <h2 className="text-[1.2vw] font-semibold text-gray-700 mb-[1vw]">
-            Leverage Ratio
-          </h2>
-          <div className="h-[25vw]">
-            {/*@ts-ignore*/}
-            {/* <Line data={chartData3} options={commonOptions} /> */}
           </div>
         </div>
       </div>
