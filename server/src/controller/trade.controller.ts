@@ -517,47 +517,69 @@ export const getUserTradeStats = async (
     });
   }
 };
-// Helper method to calculate the equity curve for a user
+// Helper method to calculate the equity curve for a userconst getEquityCurve = async (userId: number, initialBalance: number) => {
 const getEquityCurve = async (userId: number, initialBalance: number) => {
   try {
-    // Fetch all trades for the user, ordered by openDate
     const trades = await Trade.findAll({
       where: { userId },
       order: [["openDate", "ASC"]],
-      attributes: ["id", "entryPrice", "exitPrice", "status", "openDate"],
+      attributes: ["profit", "openDate"],
+      raw: true,
     });
+
+    if (!trades.length) return []; // No trades found
 
     // Initialize equity curve starting from the initial balance
     let equity = initialBalance;
     let equityCurve: { date: string; equity: number }[] = [
-      { date: new Date(0).toISOString(), equity: initialBalance }, // Start point (epoch)
+      { date: trades[0].openDate.toISOString(), equity },
     ];
 
-    // Iterate over trades to calculate the cumulative equity
+    // Iterate over trades to calculate cumulative equity
     trades.forEach((trade) => {
-      const profitOrLoss =
-        trade.status === "win"
-          ? trade.exitPrice - trade.entryPrice
-          : trade.entryPrice - trade.exitPrice;
-
-      // Update the equity
-      equity += profitOrLoss;
-
-      // Push the equity at this trade's close date
-      equityCurve.push({
-        date: new Date(trade.openDate).toISOString(),
-        equity: equity,
-      });
+      equity += trade.profit;
+      equityCurve.push({ date: trade.openDate.toISOString(), equity });
     });
 
     return equityCurve;
   } catch (error) {
     console.error("Error fetching equity curve:", error);
-    throw error;
+    return null;
   }
 };
 
-// Endpoint to get User's Equity Curve
+const getMonthlyEquityCurve = async (
+  userId: number,
+  initialBalance: number,
+) => {
+  const equityCurve = await getEquityCurve(userId, initialBalance);
+
+  if (!equityCurve || equityCurve.length === 0) return [];
+
+  // Group equity by month
+  const monthlyEquity: { [key: string]: number } = {};
+
+  equityCurve.forEach((point) => {
+    const date = new Date(point.date);
+    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+
+    if (!monthlyEquity[monthKey]) {
+      monthlyEquity[monthKey] = point.equity;
+    } else {
+      monthlyEquity[monthKey] = point.equity;
+    }
+  });
+
+  // Convert to array of objects
+  const monthlyEquityCurve = Object.keys(monthlyEquity).map((month) => ({
+    date: month,
+    equity: monthlyEquity[month],
+  }));
+
+  return monthlyEquityCurve;
+};
+
+// Endpoint to get User's Monthly Equity Curve
 export const getUserEquityCurve = async (
   req: Request,
   res: Response<StandardResponse<any>>,
@@ -566,11 +588,23 @@ export const getUserEquityCurve = async (
     const token: string = req.headers.authorization?.split(" ")[1] || "";
     const claims = getClaimsFromToken(token);
     const userId = claims.id;
-    const initialBalance = 10000; // Example initial balance of $10,000
 
-    const equityCurve = await getEquityCurve(userId, initialBalance);
+    const user = await User.findOne({
+      where: { id: userId },
+      attributes: ["initial_capital"],
+      raw: true,
+    });
 
-    if (equityCurve.length === 0) {
+    const initialBalance = user?.initial_capital; // Example initial balance of $10,000
+
+    const monthlyEquityCurve = await getMonthlyEquityCurve(
+      userId,
+      initialBalance || 0,
+    );
+
+    console.log("Monthly equity curve:", monthlyEquityCurve);
+
+    if (monthlyEquityCurve?.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No trades found for this user.",
@@ -579,11 +613,11 @@ export const getUserEquityCurve = async (
 
     return res.status(200).json({
       success: true,
-      message: "Equity curve retrieved successfully.",
-      data: equityCurve,
+      message: "Monthly equity curve retrieved successfully.",
+      data: monthlyEquityCurve,
     });
   } catch (error) {
-    console.error("Error fetching equity curve:", error);
+    console.error("Error fetching monthly equity curve:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",

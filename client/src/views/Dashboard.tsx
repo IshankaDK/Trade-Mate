@@ -142,7 +142,7 @@ export const Dashboard = () => {
         borderColor: "#6577FE",
         backgroundColor: "rgba(101, 119, 254, 0.2)",
         fill: true,
-        tension: 0.4,
+        tension: 0.2,
       },
     ],
   };
