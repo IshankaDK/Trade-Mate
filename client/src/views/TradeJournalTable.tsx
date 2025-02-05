@@ -2,8 +2,10 @@ import MUIDataTable, { MUIDataTableColumnDef } from "mui-datatables";
 import { Chip, createTheme, ThemeProvider } from "@mui/material";
 import { CurrencyDto } from "../types/CurrencyDto";
 import { StrategyDto } from "../types/StrategyDto";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { Trade } from "../types/TradeDto.ts";
+import APIClient from "../util/APIClient.ts";
+import { toast } from "react-toastify";
 
 export interface TradeTableData {
   id: number;
@@ -37,14 +39,35 @@ interface TradeJournalTableProps {
   openTradeForm: () => void;
   // onCloseTradeForm: () => void;
   handleSelectedData: (data: Trade | null) => void;
+  getAllTradesByUser: () => void;
 }
 
 const TradeJournalTable = ({
   tradeData,
   handleSelectedData,
   openTradeForm,
+  getAllTradesByUser,
   // onCloseTradeForm,
 }: TradeJournalTableProps) => {
+  function deleteTrade(id: number | undefined) {
+    console.log("Delete trade with id: ", id);
+    APIClient.delete(`/trades/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((response) => {
+        if (response.data.success) {
+          toast.success("Trade deleted successfully.");
+          getAllTradesByUser();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("Error deleting trade.");
+      });
+  }
+
   const columns: MUIDataTableColumnDef[] = [
     {
       name: "openDate",
@@ -222,7 +245,7 @@ const TradeJournalTable = ({
     },
     {
       name: "option",
-      label: "Option",
+      label: "Option   ",
       // center
       options: {
         filter: false,
@@ -230,16 +253,26 @@ const TradeJournalTable = ({
           const data = tradeData[tableMeta.rowIndex];
           const trade: Trade = { ...data };
           return (
-            <button
-              className="bg-green-50 border text-green-600 p-2 rounded-full hover:bg-green-100 hover:text-green-800 transition-colors"
-              aria-label="Edit"
-              onClick={() => {
-                handleSelectedData(trade);
-                openTradeForm();
-              }}
-            >
-              <Pencil size={15} strokeWidth={2} />
-            </button>
+            <div className="grid grid-cols-2 gap-2 px-2">
+              <button
+                className="bg-green-50  text-green-600 p-2 rounded-full hover:bg-green-100 hover:text-green-800 transition-colors"
+                aria-label="Edit"
+                onClick={() => {
+                  handleSelectedData(trade);
+                  openTradeForm();
+                }}
+              >
+                <Pencil size={15} strokeWidth={2} />
+              </button>
+
+              <button
+                className="bg-red-50 text-red-600 p-2 rounded-full hover:bg-red-100 hover:text-red-800 transition-colors"
+                aria-label="Delete"
+                onClick={() => deleteTrade(trade.id)}
+              >
+                <Trash size={15} strokeWidth={2} />
+              </button>
+            </div>
           );
         },
       },

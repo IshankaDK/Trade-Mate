@@ -34,7 +34,6 @@ export const ManageStrategyView: React.FC = () => {
     })
       .then((response) => {
         setStrategiesList(response.data.data);
-        toast.success("Strategies loaded successfully!");
       })
       .catch((error) => {
         const errorMessage =

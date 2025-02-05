@@ -16,6 +16,7 @@ const JournalView = () => {
 
   const getAllTradesByUser = async () => {
     try {
+      setTradesList([]);
       const response = await APIClient.get("/trades/user", {
         method: "GET",
         headers: {
@@ -62,12 +63,13 @@ const JournalView = () => {
           tradeData={tradesList}
           openTradeForm={() => setOpen(true)}
           handleSelectedData={handleSelectedData}
+          getAllTradesByUser={getAllTradesByUser}
         />
       </div>
 
       <TradeJournalForm
         data={data}
-        handleSelectedData={handleSelectedData}
+        // handleSelectedData={handleSelectedData}
         open={open}
         onClose={async () => {
           setOpen(false);

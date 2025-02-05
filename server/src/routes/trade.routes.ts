@@ -1,9 +1,10 @@
 import { Router } from "express";
 import {
-  saveTrade,
+  deleteTradeById,
   getAllTradesByUser,
-  getUserTradeStats,
   getUserEquityCurve,
+  getUserTradeStats,
+  saveTrade,
 } from "../controller/trade.controller";
 
 const router = Router();
@@ -15,6 +16,7 @@ router.post("/", saveTrade);
 router.get("/user", getAllTradesByUser);
 
 // delete
+router.delete("/:id", deleteTradeById);
 
 // stats
 router.get("/users/trade-stats", getUserTradeStats);

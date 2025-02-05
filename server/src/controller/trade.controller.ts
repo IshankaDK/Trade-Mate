@@ -10,12 +10,12 @@ import User from "../models/User";
 // Create a Trade
 export const saveTrade = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>
+  res: Response<StandardResponse<Trade>>,
 ) => {
   try {
     let tradeData = req.body;
     tradeData.userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || ""
+      req.headers.authorization?.split(" ")[1] || "",
     ).id;
     console.log("tradeData", tradeData);
 
@@ -24,7 +24,7 @@ export const saveTrade = async (
       exitPrice: number,
       positionSize: number,
       status: string,
-      type: string
+      type: string,
     ) => {
       if (type === "buy") {
         if (status === "win") {
@@ -48,7 +48,7 @@ export const saveTrade = async (
         tradeData.exitPrice,
         tradeData.positionSize,
         tradeData.status,
-        tradeData.type
+        tradeData.type,
       ),
     };
 
@@ -70,7 +70,7 @@ export const saveTrade = async (
 // Get all Trades by User
 export const getAllTradesByUser = async (
   req: Request,
-  res: Response<StandardResponse<Trade[]>>
+  res: Response<StandardResponse<Trade[]>>,
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -100,7 +100,7 @@ export const getAllTradesByUser = async (
 // Get a Trade by ID
 export const getTradeById = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>
+  res: Response<StandardResponse<Trade>>,
 ) => {
   try {
     const { id } = req.params;
@@ -134,9 +134,10 @@ export const getTradeById = async (
 // Delete a Trade by ID
 export const deleteTradeById = async (
   req: Request,
-  res: Response<StandardResponse<null>>
+  res: Response<StandardResponse<null>>,
 ) => {
   try {
+    console.log("Method deleteTradeById called");
     const { id } = req.params;
 
     const trade = await Trade.findByPk(id);
@@ -226,7 +227,7 @@ const getTotalStrategyCount = async (userId: number): Promise<number> => {
 
 // Helper method to get the most profitable strategy
 const getProfitableStrategy = async (
-  userId: number
+  userId: number,
 ): Promise<{ strategyId: number; totalProfit: number } | null> => {
   try {
     const trades = await Trade.findAll({
@@ -303,7 +304,6 @@ const getHighestLossTradeProfit = async (userId: number) => {
 };
 
 //get strategy name with it
-
 const getMostProfitableStrategy = async (userId: number) => {
   const result = await Trade.findOne({
     where: { userId },
@@ -418,7 +418,7 @@ const getDrawDownRatio = async (userId: number) => {
           Sequelize.fn(
             "COALESCE",
             Sequelize.fn("SUM", Sequelize.col("profit")),
-            0
+            0,
           ),
           "totalProfitBeforeLoss",
         ],
@@ -610,7 +610,7 @@ const getProfitLoss = async (userId: number) => {
 // Endpoint to get User's Trade Statistics
 export const getUserTradeStats = async (
   req: Request,
-  res: Response<StandardResponse<any>>
+  res: Response<StandardResponse<any>>,
 ) => {
   try {
     console.log("Method getUserTradeStats called");
@@ -707,7 +707,7 @@ const getEquityCurve = async (userId: number, initialBalance: number) => {
 
 const getMonthlyEquityCurve = async (
   userId: number,
-  initialBalance: number
+  initialBalance: number,
 ) => {
   const equityCurve = await getEquityCurve(userId, initialBalance);
 
@@ -739,7 +739,7 @@ const getMonthlyEquityCurve = async (
 // Endpoint to get User's Monthly Equity Curve
 export const getUserEquityCurve = async (
   req: Request,
-  res: Response<StandardResponse<any>>
+  res: Response<StandardResponse<any>>,
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -756,7 +756,7 @@ export const getUserEquityCurve = async (
 
     const monthlyEquityCurve = await getMonthlyEquityCurve(
       userId,
-      initialBalance || 0
+      initialBalance || 0,
     );
 
     console.log("Monthly equity curve:", monthlyEquityCurve);

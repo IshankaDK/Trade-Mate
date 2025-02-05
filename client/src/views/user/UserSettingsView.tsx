@@ -23,7 +23,7 @@ export const UserSettingsView: React.FC = () => {
     gender: "N/A",
     initial_capital: 0.0,
   });
-  const [date, setDate] = useState<string>(new Date().toLocaleString());
+  // const [date, setDate] = useState<string>(new Date().toLocaleString());
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   // Load user details from API
@@ -48,12 +48,12 @@ export const UserSettingsView: React.FC = () => {
   }, []);
 
   // Update the displayed date every second
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setDate(new Date().toLocaleString());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     // setDate(new Date().toLocaleString());
+  //   }, 1000);
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   return (
     <div className="m-2 grid lg:grid-cols-4  rounded bg-gray-50/50 min-h-screen ">
