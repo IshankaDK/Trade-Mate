@@ -50,7 +50,7 @@ const TradeJournalTable = ({
   // onCloseTradeForm,
 }: TradeJournalTableProps) => {
   function deleteTrade(id: number | undefined) {
-    console.log("Delete trade with id: ", id);
+    // console.log("Delete trade with id: ", id);
     APIClient.delete(`/trades/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -63,7 +63,7 @@ const TradeJournalTable = ({
         }
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         toast.error("Error deleting trade.");
       });
   }
@@ -166,7 +166,7 @@ const TradeJournalTable = ({
             )
             .filter((value, index, self) => self.indexOf(value) === index),
           logic: (value: any, filterVal: any) => {
-            console.log(value.from, filterVal);
+            // console.log(value.from, filterVal);
 
             return value.from + "/" + value.to !== filterVal[0];
           },
@@ -253,7 +253,7 @@ const TradeJournalTable = ({
           const data = tradeData[tableMeta.rowIndex];
           const trade: Trade = { ...data };
           return (
-            <div className="grid grid-cols-2 gap-2 px-2">
+            <div className="grid grid-cols-2 min-w-20 gap-2 px-2">
               <button
                 className="bg-green-50  text-green-600 p-2 rounded-full hover:bg-green-100 hover:text-green-800 transition-colors"
                 aria-label="Edit"

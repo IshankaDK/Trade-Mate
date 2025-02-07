@@ -26,7 +26,6 @@ export const ManageStrategyView: React.FC = () => {
 
   // Load all strategies
   const loadAllStrategies = () => {
-    console.log("Loading all strategies...");
     APIClient.get("/strategies/user", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -45,10 +44,10 @@ export const ManageStrategyView: React.FC = () => {
   useEffect(() => {
     loadAllStrategies();
   }, []);
-
-  useEffect(() => {
-    console.log(strategiesList);
-  }, [strategiesList]);
+  //
+  // useEffect(() => {
+  //   console.log(strategiesList);
+  // }, [strategiesList]);
 
   return (
     <div className="min-h-screen py-[1vw]">

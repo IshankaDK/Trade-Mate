@@ -68,7 +68,7 @@ export const Signup = () => {
     try {
       const response = await APIClient.post("/auth/register", registrationData);
       if (response.status === 201) {
-        console.log(response.data.message);
+        // console.log(response.data.message);
         toast.success("Registration successful! ");
       } else {
         toast.error(response.data.message || "Something went wrong.");

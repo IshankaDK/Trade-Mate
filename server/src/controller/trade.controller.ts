@@ -17,7 +17,7 @@ export const saveTrade = async (
     tradeData.userId = getClaimsFromToken(
       req.headers.authorization?.split(" ")[1] || "",
     ).id;
-    console.log("tradeData", tradeData);
+    // console.log("tradeData", tradeData);
 
     const calculateProfit = (
       entryPrice: number,
@@ -82,10 +82,26 @@ export const getAllTradesByUser = async (
       include: ["strategy", "currencyPair"], // Adjust associations as needed
     });
 
+    // Format dates in the required "2025-02-08T10:30" format
+    const formattedTrades = trades.map((trade) => {
+      const openDate = trade.openDate ? new Date(trade.openDate) : null;
+      const closeDate = trade.closeDate ? new Date(trade.closeDate) : null;
+
+      return {
+        ...trade.toJSON(), // Include all other trade fields
+        openDate: openDate
+          ? `${openDate.getFullYear()}-${String(openDate.getMonth() + 1).padStart(2, "0")}-${String(openDate.getDate()).padStart(2, "0")}T${String(openDate.getHours()).padStart(2, "0")}:${String(openDate.getMinutes()).padStart(2, "0")}`
+          : null,
+        closeDate: closeDate
+          ? `${closeDate.getFullYear()}-${String(closeDate.getMonth() + 1).padStart(2, "0")}-${String(closeDate.getDate()).padStart(2, "0")}T${String(closeDate.getHours()).padStart(2, "0")}:${String(closeDate.getMinutes()).padStart(2, "0")}`
+          : null,
+      };
+    });
+
     return res.status(200).json({
       success: true,
       message: "Trades retrieved successfully.",
-      data: trades,
+      data: formattedTrades,
     });
   } catch (error) {
     console.error("Error fetching trades:", error);
@@ -107,6 +123,10 @@ export const getTradeById = async (
 
     const trade = await Trade.findByPk(id, {
       include: ["strategy", "currencyPair"], // Adjust associations as needed
+      //   order by id desc
+      order: [
+        ["id", "DESC"], // Ordering by ID in descending order
+      ],
     });
 
     if (!trade) {
@@ -137,7 +157,7 @@ export const deleteTradeById = async (
   res: Response<StandardResponse<null>>,
 ) => {
   try {
-    console.log("Method deleteTradeById called");
+    // console.log("Method deleteTradeById called");
     const { id } = req.params;
 
     const trade = await Trade.findByPk(id);
@@ -157,6 +177,125 @@ export const deleteTradeById = async (
     });
   } catch (error) {
     console.error("Error deleting trade:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+export const updateTrade = async (
+  req: Request<
+    {
+      id: string;
+    },
+    {},
+    Partial<Trade>
+  >,
+  res: Response<StandardResponse<Trade>>,
+) => {
+  try {
+    // console.log("Method updateTrade called");
+    const tradeId = req.params.id; // Trade ID from route parameters
+    const userId = getClaimsFromToken(
+      req.headers.authorization?.split(" ")[1] || "",
+    ).id; // Extract the user ID from the token
+
+    // Find the existing trade
+    const trade = await Trade.findOne({
+      where: {
+        id: tradeId,
+        userId: userId, // Ensure the trade belongs to the user
+      },
+    });
+
+    if (!trade) {
+      return res.status(404).json({
+        success: false,
+        message: "Trade not found or you do not have access to it.",
+      });
+    }
+
+    // Extract fields from the request body
+    const {
+      openDate,
+      closeDate,
+      currencyPairId,
+      strategyId,
+      status,
+      type,
+      duration,
+      entryPrice,
+      exitPrice,
+      positionSize,
+      marketTrend,
+      stopLossPrice,
+      takeProfitPrice,
+      transactionCost,
+      reason,
+      comment,
+      categories,
+    } = req.body;
+
+    // Recalculate profit if necessary
+    const calculateProfit = (
+      entryPrice: number,
+      exitPrice: number,
+      positionSize: number,
+      status: string,
+      type: string,
+    ) => {
+      if (type === "buy") {
+        return status === "win"
+          ? (exitPrice - entryPrice) * (positionSize / entryPrice)
+          : (exitPrice - entryPrice) * (positionSize / entryPrice);
+      } else {
+        return status === "win"
+          ? (entryPrice - exitPrice) * (positionSize / entryPrice)
+          : (exitPrice - entryPrice) * (positionSize / entryPrice);
+      }
+    };
+
+    const updatedProfit =
+      entryPrice && exitPrice && positionSize && status && type
+        ? calculateProfit(entryPrice, exitPrice, positionSize, status, type)
+        : trade.profit;
+
+    // Update the trade
+    const updatedTrade = await trade.update({
+      openDate: openDate !== undefined ? openDate : trade.openDate,
+      closeDate: closeDate !== undefined ? closeDate : trade.closeDate,
+      currencyPairId:
+        currencyPairId !== undefined ? currencyPairId : trade.currencyPairId,
+      strategyId: strategyId !== undefined ? strategyId : trade.strategyId,
+      status: status !== undefined ? status : trade.status,
+      type: type !== undefined ? type : trade.type,
+      duration: duration !== undefined ? duration : trade.duration,
+      entryPrice: entryPrice !== undefined ? entryPrice : trade.entryPrice,
+      exitPrice: exitPrice !== undefined ? exitPrice : trade.exitPrice,
+      positionSize:
+        positionSize !== undefined ? positionSize : trade.positionSize,
+      marketTrend: marketTrend !== undefined ? marketTrend : trade.marketTrend,
+      stopLossPrice:
+        stopLossPrice !== undefined ? stopLossPrice : trade.stopLossPrice,
+      takeProfitPrice:
+        takeProfitPrice !== undefined ? takeProfitPrice : trade.takeProfitPrice,
+      transactionCost:
+        transactionCost !== undefined ? transactionCost : trade.transactionCost,
+      reason: reason !== undefined ? reason : trade.reason,
+      comment: comment !== undefined ? comment : trade.comment,
+      categories: categories !== undefined ? categories : trade.categories,
+      profit: updatedProfit,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Trade updated successfully.",
+      data: updatedTrade,
+    });
+  } catch (error) {
+    console.error("Error updating trade:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
@@ -613,7 +752,7 @@ export const getUserTradeStats = async (
   res: Response<StandardResponse<any>>,
 ) => {
   try {
-    console.log("Method getUserTradeStats called");
+    // console.log("Method getUserTradeStats called");
     const token: string = req.headers.authorization?.split(" ")[1] || "";
     const claims = getClaimsFromToken(token);
     const userId = claims.id;
@@ -658,7 +797,6 @@ export const getUserTradeStats = async (
       tradeDuration,
       profitLoss,
     };
-    console.log(data);
 
     return res.status(200).json({
       success: true,
@@ -758,8 +896,6 @@ export const getUserEquityCurve = async (
       userId,
       initialBalance || 0,
     );
-
-    console.log("Monthly equity curve:", monthlyEquityCurve);
 
     if (monthlyEquityCurve?.length === 0) {
       return res.status(404).json({

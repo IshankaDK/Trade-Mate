@@ -113,8 +113,6 @@ export const updateUserDetails = async (req: Request, res: Response) => {
     user.gender = gender || user.gender;
     user.initial_capital = initial_capital || user.initial_capital;
 
-    console.log(user);
-
     await user.save();
 
     res.status(200).json({

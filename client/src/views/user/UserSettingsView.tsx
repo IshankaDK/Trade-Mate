@@ -35,7 +35,7 @@ export const UserSettingsView: React.FC = () => {
     })
       .then((response) => {
         const user: UserDto = response.data.data;
-        console.log(user);
+        // console.log(user);
         setUser(user);
       })
       .catch((error) => {

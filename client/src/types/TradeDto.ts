@@ -12,7 +12,7 @@ export interface Trade {
   type: "buy" | "sell" | "";
   entryPrice: number;
   exitPrice: number;
-  tradeCategories: string[] | null;
+  categories: string[] | null;
   marketTrend: string;
 
   strategy?: StrategyDto;

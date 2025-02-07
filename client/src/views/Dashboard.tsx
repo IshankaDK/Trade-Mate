@@ -29,7 +29,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 interface TradeData {
@@ -93,7 +93,7 @@ export const Dashboard = () => {
     })
       .then((response) => {
         const user: UserDto = response.data.data;
-        console.log(user);
+        // console.log(user);
         setUser(user);
       })
       .catch((error) => {
@@ -120,7 +120,7 @@ export const Dashboard = () => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((response) => {
-      console.log(response.data.data);
+      // console.log(response.data.data);
       setStats(response.data.data);
     });
 
@@ -130,7 +130,7 @@ export const Dashboard = () => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((response) => {
-      console.log(response.data.data);
+      // console.log(response.data.data);
       setEquityData(response.data.data);
     });
   }, []);

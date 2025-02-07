@@ -119,8 +119,15 @@ Trade.init(
       allowNull: true,
     },
     categories: {
-      type: DataTypes.JSON, // Store categories as JSON
-      allowNull: true,
+      type: DataTypes.STRING, // Stored as a comma-separated string
+      allowNull: false,
+      get() {
+        const value = this.getDataValue("categories");
+        return value ? value.split(",") : []; // Converts string to array
+      },
+      set(value: string[]) {
+        this.setDataValue("categories", value.join(",")); // Converts array to string
+      },
     },
     profit: {
       type: DataTypes.FLOAT,

@@ -52,7 +52,7 @@ export const Login = () => {
 
     try {
       const response = await APIClient.post("/auth/login", loginData);
-      console.log("Login Successful:", response.data.data.token);
+      // console.log("Login Successful:", response.data.data.token);
       const { data, message } = response.data;
       toast.success(message || "Login successful!");
       localStorage.setItem("token", data.token);

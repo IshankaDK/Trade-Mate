@@ -24,7 +24,7 @@ const JournalView = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log(response.data.data);
+      // console.log(response.data.data);
       setTradesList(response.data.data);
     } catch (error) {
       console.error("Error fetching trades:", error);
@@ -35,6 +35,7 @@ const JournalView = () => {
 
   const handleSelectedData = (newData: Trade | null) => {
     // additional
+    // console.log(newData);
     setData(newData);
   };
 
@@ -74,6 +75,7 @@ const JournalView = () => {
         onClose={async () => {
           setOpen(false);
           getAllTradesByUser();
+          setData(null);
         }}
       />
     </div>

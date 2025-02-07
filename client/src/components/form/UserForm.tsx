@@ -110,7 +110,7 @@ export const UpdateUserForm: React.FC<UpdateUserFormProps> = ({
       initial_capital: formData.initial_capital,
     };
 
-    console.log(formDataToSubmit);
+    // console.log(formDataToSubmit);
 
     APIClient.patch("/users", formDataToSubmit, {
       headers: {

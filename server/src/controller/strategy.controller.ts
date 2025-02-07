@@ -11,9 +11,9 @@ export const createStrategy = async (
   res: Response<StandardResponse<Strategy>>,
 ) => {
   try {
-    console.log("Method createStrategy called");
+    // console.log("Method createStrategy called");
     const strategyData = req.body;
-    console.log(strategyData);
+    // console.log(strategyData);
     strategyData.userId = getClaimsFromToken(
       req.headers.authorization?.split(" ")[1] || "",
     ).id;
@@ -56,7 +56,7 @@ export const getAllStrategiesByUser = async (
   res: Response<StandardResponse<any[]>>,
 ) => {
   try {
-    console.log("Method getAllStrategiesByUser called");
+    // console.log("Method getAllStrategiesByUser called");
 
     const token: string | undefined = req.headers.authorization?.split(" ")[1];
 
@@ -149,8 +149,8 @@ export const updateStrategyById = async (
   res: Response<StandardResponse<Strategy>>,
 ) => {
   try {
-    console.log("Method updateStrategyById called");
-    console.log(req.body);
+    // console.log("Method updateStrategyById called");
+    // console.log(req.body);
     const { id, userId } = req.body;
     const updatedData = req.body;
 

@@ -5,6 +5,7 @@ import {
   getUserEquityCurve,
   getUserTradeStats,
   saveTrade,
+  updateTrade,
 } from "../controller/trade.controller";
 
 const router = Router();
@@ -17,6 +18,9 @@ router.get("/user", getAllTradesByUser);
 
 // delete
 router.delete("/:id", deleteTradeById);
+
+// update
+router.put("/:id", updateTrade);
 
 // stats
 router.get("/users/trade-stats", getUserTradeStats);

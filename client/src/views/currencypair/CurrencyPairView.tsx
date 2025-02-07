@@ -39,7 +39,7 @@ const CurrencyPairDialog: React.FC<DialogProps> = ({
       },
     )
       .then((response) => {
-        console.log("Currency pair saved successfully: ", response.data);
+        // console.log("Currency pair saved successfully: ", response.data);
         toast.success("Currency pair saved successfully.");
         refresh();
         onClose();
@@ -129,7 +129,7 @@ export const CurrencyPairView: React.FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         toast.error("Error deleting currency pair.");
       });
   };

@@ -45,7 +45,7 @@ const TradeJournalForm = ({
     type: "",
     entryPrice: 0,
     exitPrice: 0,
-    tradeCategories: [],
+    categories: [],
     marketTrend: "",
     stopLossPrice: 0,
     takeProfitPrice: 0,
@@ -53,6 +53,8 @@ const TradeJournalForm = ({
     reason: "",
     comment: "",
     positionSize: 0,
+    currencyPairId: 0,
+    strategyId: 0,
   });
 
   const [currencies, setCurrencies] = useState<CurrencyDto[]>([]);
@@ -65,10 +67,27 @@ const TradeJournalForm = ({
       try {
         await getAllCurrencies();
         await getAllStrategies();
-
         if (data) {
-          setTrade(data);
-          setSelectedCategories(data.tradeCategories || []);
+          setTrade({
+            ...data,
+            strategyId: data?.strategy?.id,
+            currencyPairId: data?.currencyPair?.id,
+          });
+
+          if (data?.currencyPair?.id) {
+            setTrade((prev) => ({
+              ...prev,
+              currencyPairId: data.currencyPair?.id,
+            }));
+          }
+          setSelectedCategories(data.categories || []);
+
+          if (data.openDate && data.closeDate) {
+            const openDate = new Date(data.openDate);
+            const closeDate = new Date(data.closeDate);
+            const durationInMs = closeDate.getTime() - openDate.getTime();
+            showDurationValue(durationInMs);
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -120,6 +139,28 @@ const TradeJournalForm = ({
         },
       });
       toast.success("Trade added successfully.");
+      clearForm();
+      onClose();
+    } catch (error) {
+      toast.error("Failed to add trade.");
+    }
+  };
+
+  const updateTrade = async () => {
+    try {
+      await APIClient.put(
+        "/trades/" + trade.id,
+        {
+          ...trade,
+          id: data?.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+      toast.success("Trade updated successfully.");
       clearForm();
       onClose();
     } catch (error) {
@@ -194,7 +235,7 @@ const TradeJournalForm = ({
       : selectedCategories.filter((category) => category !== value);
 
     setSelectedCategories(newCategories);
-    setTrade((prev) => ({ ...prev, tradeCategories: newCategories }));
+    setTrade((prev) => ({ ...prev, categories: newCategories }));
   };
 
   const validateForm = (trade: Trade) => {
@@ -240,7 +281,7 @@ const TradeJournalForm = ({
       return false;
     }
 
-    if (!trade.tradeCategories || trade.tradeCategories.length === 0) {
+    if (!trade.categories || trade.categories.length === 0) {
       toast.error("Trade Category is required.");
       return false;
     }
@@ -265,7 +306,11 @@ const TradeJournalForm = ({
 
   const handleSubmit = () => {
     if (validateForm(trade)) {
-      saveTrade();
+      if (!data) {
+        saveTrade();
+      } else {
+        updateTrade();
+      }
     }
   };
 
@@ -278,7 +323,7 @@ const TradeJournalForm = ({
       type: "",
       entryPrice: 0,
       exitPrice: 0,
-      tradeCategories: [],
+      categories: [],
       marketTrend: "",
       stopLossPrice: 0,
       takeProfitPrice: 0,
@@ -286,6 +331,8 @@ const TradeJournalForm = ({
       reason: "",
       comment: "",
       positionSize: 0,
+      currencyPairId: 0,
+      strategyId: 0,
     });
     setDuration("");
     setSelectedCategories([]);
@@ -342,13 +389,13 @@ const TradeJournalForm = ({
                 InputProps={{ readOnly: true }}
               />
               <TextField
-                name="currencyPair"
+                name="currencyPairId"
                 label="Currency Pair"
                 size="small"
                 fullWidth
                 required
                 select
-                value={trade.currencyPairId}
+                value={trade.currencyPairId || ""}
                 onChange={setCurrencyId}
               >
                 {currencies.map((currency) => (
@@ -503,13 +550,13 @@ const TradeJournalForm = ({
                 ))}
               </TextField>
               <TextField
-                name="tradingStrategy"
+                name="strategyId"
                 label="Trading Strategy"
                 select
                 fullWidth
                 required
                 size="small"
-                value={trade.strategyId}
+                value={trade.strategyId || ""}
                 onChange={setStrategyId}
               >
                 {strategies.map((strategy) => (
