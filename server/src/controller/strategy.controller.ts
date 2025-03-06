@@ -4,18 +4,19 @@ import { StandardResponse } from "../dto/StandardResponse";
 import { getClaimsFromToken } from "../utils/Jwt.utils";
 import User from "../models/User";
 import Trade from "../models/Trade";
+import { Sequelize } from "sequelize";
 
 // Create a new Strategy
 export const createStrategy = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>,
+  res: Response<StandardResponse<Strategy>>
 ) => {
   try {
     // console.log("Method createStrategy called");
     const strategyData = req.body;
     // console.log(strategyData);
     strategyData.userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || "",
+      req.headers.authorization?.split(" ")[1] || ""
     ).id;
 
     // Validate that all required fields are provided
@@ -53,7 +54,7 @@ export const createStrategy = async (
 
 export const getAllStrategiesByUser = async (
   req: Request,
-  res: Response<StandardResponse<any[]>>,
+  res: Response<StandardResponse<any[]>>
 ) => {
   try {
     // console.log("Method getAllStrategiesByUser called");
@@ -86,7 +87,7 @@ export const getAllStrategiesByUser = async (
         });
         const totalTrades: number = trades.length;
         const winningTrades = trades.filter(
-          (trade) => trade.status === "win",
+          (trade) => trade.status === "win"
         ).length;
         const winRate =
           totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
@@ -96,7 +97,7 @@ export const getAllStrategiesByUser = async (
           winRate: parseFloat(winRate.toFixed(2)), // Ensure numeric type
           totalTrades,
         };
-      }),
+      })
     );
 
     return res.status(200).json({
@@ -117,7 +118,7 @@ export const getAllStrategiesByUser = async (
 // Get a Strategy by ID
 export const getStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>,
+  res: Response<StandardResponse<Strategy>>
 ) => {
   try {
     const { id } = req.params;
@@ -146,7 +147,7 @@ export const getStrategyById = async (
 // Update a Strategy by ID
 export const updateStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<Strategy>>,
+  res: Response<StandardResponse<Strategy>>
 ) => {
   try {
     // console.log("Method updateStrategyById called");
@@ -202,7 +203,7 @@ export const updateStrategyById = async (
 // Delete a Strategy by ID
 export const deleteStrategyById = async (
   req: Request,
-  res: Response<StandardResponse<null>>,
+  res: Response<StandardResponse<null>>
 ) => {
   try {
     const { id } = req.params;
@@ -233,7 +234,7 @@ export const deleteStrategyById = async (
 // Endpoint to get trades by strategy id
 export const getAssociatedTrades = async (
   req: Request,
-  res: Response<StandardResponse<any>>,
+  res: Response<StandardResponse<any>>
 ) => {
   try {
     const { strategyId } = req.body;
@@ -265,5 +266,205 @@ export const getAssociatedTrades = async (
       message: "Internal server error.",
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+};
+
+// Endpoint to get User's Trade Statistics
+export const getStrategyTradeStats = async (
+  req: Request,
+  res: Response<StandardResponse<any>>
+) => {
+  try {
+    // console.log("Method getUserTradeStats called");
+
+    const userId = req.params.userId as unknown as number;
+    const strategyId = req.params.id as string;
+
+    const trades = await Trade.findAll({
+      where: { userId },
+    });
+
+    // const generalStats = calculateGeneralStats(trades);
+    // const monthlyProfits = calculateMonthlyStats(trades);
+    // const totalStrategyCount = await getTotalStrategyCount(userId);
+    // const highestWinTrade = await getHighestWinTradeProfit(userId);
+    // const dailyPL = await calculateNetDailyPL(userId, new Date());
+    // const averageHoldingPeriod = await getAverageHoldingPeriod(userId);
+    // const highestLossTrade = await getHighestLossTradeProfit(userId);
+    // const totalCurrencyPairsCount = await getTotalCurrencyPairsCount(userId);
+    // const mostProfitableStrategy = await getMostProfitableStrategy(userId);
+    const riskToRewardRatio = await getRiskToRewardRatio(userId, strategyId);
+
+    const winLossRatio = await getWinLossRatio(userId, strategyId);
+    // const tradeDuration = await getTradeDuration(userId);
+    // const profitLoss = await getProfitLoss(userId);
+    const averageProfitLoss = await getAverageProfitLoss(userId, strategyId);
+    const drawDownRatio = await getDrawDownRatio(userId, strategyId);
+
+    const data = {
+      // totalTrades: generalStats.totalTrades,
+      // winTrades: generalStats.winTrades,
+      // lossTrades: generalStats.lossTrades,
+      // winRate: generalStats.winRate.toFixed(2),
+      // totalProfit: generalStats.totalProfit.toFixed(2),
+      // totalStrategyCount,
+      // monthlyProfits,
+      // highestWinTrade,
+      // dailyPL,
+      // averageHoldingPeriod,
+      // highestLossTrade,
+      // totalCurrencyPairsCount,
+      // mostProfitableStrategy,
+      riskToRewardRatio,
+      drawDownRatio,
+      winLossRatio,
+      // tradeDuration,
+      // profitLoss,
+      averageProfitLoss,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "User trade statistics retrieved successfully.",
+      data,
+    });
+  } catch (error) {
+    console.error("Error fetching trade statistics:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+const getWinLossRatio = async (userId: number, strategyId: string) => {
+  try {
+    const trades = await Trade.findAll({
+      where: { userId, strategyId },
+      attributes: ["profit", "openDate"], // Include creation date to group by month
+      raw: true,
+    });
+
+    console.log("trades", trades);
+    if (!trades.length) return 0;
+
+    const wins = trades.filter((trade) => trade.profit > 0).length;
+    const losses = trades.filter((trade) => trade.profit <= 0).length;
+
+    const totalTrades = wins + losses;
+    const winLossRatio = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+
+    return winLossRatio.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating win/loss ratio:", error);
+    return null;
+  }
+};
+
+const getRiskToRewardRatio = async (userId: number, strategyId: string) => {
+  // Get sum of profit where status = "win"
+  const winData = await Trade.findOne({
+    where: { userId, strategyId, status: "win" },
+    attributes: [
+      [Sequelize.fn("SUM", Sequelize.col("profit")), "totalWinProfit"],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "winCount"],
+    ],
+    raw: true,
+  });
+
+  // Get sum of profit where status = "loss"
+  const lossData = await Trade.findOne({
+    where: { userId, strategyId, status: "loss" },
+    attributes: [
+      [Sequelize.fn("SUM", Sequelize.col("profit")), "totalLossProfit"],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "lossCount"],
+    ],
+    raw: true,
+  });
+
+  const totalWinProfit = parseFloat(winData?.totalWinProfit || "0");
+  const winCount = parseInt(winData?.winCount || "0");
+  const totalLossProfit = parseFloat(lossData?.totalLossProfit || "0");
+  const lossCount = parseInt(lossData?.lossCount || "0");
+
+  if (!winCount || !lossCount) return "0:0";
+
+  if (winCount === 0) return "1:0"; // Prevent division by zero
+  if (lossCount === 0) return "0:1"; // Prevent division by zero
+
+  // Calculate averages
+  const avgWin = totalWinProfit / winCount;
+  const avgLoss = Math.abs(totalLossProfit / lossCount); // Ensure positive loss value
+
+  // Risk-to-Reward Ratio = (avg loss per trade / avg win per trade) * 100
+  return `${(avgLoss / avgWin).toFixed(2)}:1`;
+};
+
+const getAverageProfitLoss = async (userId: number, strategyId: string) => {
+  const trades: any[] = await Trade.findAll({
+    where: { userId, strategyId },
+    attributes: [
+      [Sequelize.fn("AVG", Sequelize.col("profit")), "averageProfitLoss"],
+    ],
+    raw: true,
+  });
+
+  return trades[0]?.averageProfitLoss || 0;
+};
+
+const getDrawDownRatio = async (userId: number, strategyId: string) => {
+  try {
+    const highestLossTrade = await Trade.findOne({
+      where: { userId, strategyId },
+      order: [["profit", "ASC"]], // Lowest profit (largest loss)
+      attributes: ["profit", "openDate"],
+      raw: true,
+    });
+
+    if (!highestLossTrade) return null; // No trades found
+
+    const largestLoss = highestLossTrade.profit;
+    const lossDate = highestLossTrade.openDate;
+
+    const { totalProfitBeforeLoss } = (await Trade.findOne({
+      where: {
+        userId,
+        strategyId,
+        openDate: { lossDate },
+      },
+      attributes: [
+        [
+          Sequelize.fn(
+            "COALESCE",
+            Sequelize.fn("SUM", Sequelize.col("profit")),
+            0
+          ),
+          "totalProfitBeforeLoss",
+        ],
+      ],
+      raw: true,
+    })) || { totalProfitBeforeLoss: 0 };
+
+    // If there’s no balance before loss, assume user's initial capital
+    let accountBalanceBeforeLoss = totalProfitBeforeLoss;
+    if (accountBalanceBeforeLoss === 0) {
+      const user = await User.findOne({
+        where: { id: userId },
+        attributes: ["initial_capital"],
+        raw: true,
+      });
+      accountBalanceBeforeLoss = user?.initial_capital || 0;
+    }
+
+    if (accountBalanceBeforeLoss === 0) return null; // Prevent division by zero
+
+    const drawdownRatio =
+      (Math.abs(largestLoss) / accountBalanceBeforeLoss) * 100;
+
+    return drawdownRatio;
+  } catch (error) {
+    console.error("Error calculating drawdown ratio:", error);
+    return 0;
   }
 };

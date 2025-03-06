@@ -24,6 +24,7 @@ const PopupView: React.FC<PopupViewProps> = ({
   strategy,
 }) => {
   const [tradeData, setTradeData] = useState<any>([]);
+  const [tradeStats, setTradeStats] = useState<any>([]);
 
   useEffect(() => {
     APIClient.post(`strategies/trades-list`, {
@@ -31,6 +32,17 @@ const PopupView: React.FC<PopupViewProps> = ({
     })
       .then((response) => {
         setTradeData(response.data?.data || []);
+      })
+      .catch(() => {
+        // console.error("Failed to fetch trades: ", error);
+      });
+  }, [strategy.id]);
+
+  useEffect(() => {
+    APIClient.get(`strategies/strategy-stats/${strategy.userId}/${strategy.id}`)
+      .then((response) => {
+        setTradeStats(response.data?.data || []);
+        console.log(response.data);
       })
       .catch(() => {
         // console.error("Failed to fetch trades: ", error);
@@ -99,6 +111,16 @@ const PopupView: React.FC<PopupViewProps> = ({
     { name: "duration", label: "Duration" },
     { name: "entryPrice", label: "Entry Price" },
     { name: "exitPrice", label: "Exit Price" },
+    {
+      name: "positionSize",
+      label: "Position Size",
+      options: { filter: false },
+    },
+    {
+      name: "profit",
+      label: "Profit",
+      options: { filter: false },
+    },
     { name: "marketTrend", label: "Market Trend" },
     { name: "stopLossPrice", label: "Stop Loss" },
     { name: "takeProfitPrice", label: "Take Profit" },
@@ -127,8 +149,107 @@ const PopupView: React.FC<PopupViewProps> = ({
 
           {/* Table Section */}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Trade Journal
+            {strategy.name} Trades
           </h2>
+
+          {/* Stats Section */}
+          <div className="flex items-start justify-start mb-4 w-full">
+            {/* Win Rate */}
+            <div className="text-center w-1/3">
+              <p className="text-xs text-gray-500 tracking-wider">Win Rate</p>
+              <div className="flex justify-center">
+                <div className="relative w-28 h-28">
+                  <svg viewBox="0 0 40 40" className="w-full h-full">
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="18"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="18"
+                      fill="none"
+                      stroke={
+                        parseInt(tradeStats.winLossRatio) >= 50
+                          ? "#10B981"
+                          : "#EF4444"
+                      }
+                      strokeWidth="4"
+                      strokeDasharray={`
+                        ${(2 * Math.PI * 18 * parseInt(tradeStats.winLossRatio)) / 100},
+                        ${2 * Math.PI * 18 - (2 * Math.PI * 18 * parseInt(tradeStats.winLossRatio)) / 100}
+                      `}
+                      strokeDashoffset="0"
+                      strokeLinecap="round"
+                      transform="rotate(-90 20 20)"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold text-blue-800">
+                      {parseInt(tradeStats.winLossRatio)?.toFixed(0) ?? "N/A"}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {parseInt(tradeStats.winLossRatio) >= 90
+                  ? "Highly Profitabl Strategy"
+                  : parseInt(tradeStats.winLossRatio) >= 75
+                    ? "Profitable Strategy"
+                    : parseInt(tradeStats.winLossRatio) >= 50
+                      ? "Average Strategy"
+                      : "Unprofitable Strategy"}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mb-4 w-2/3">
+              {/* Risk to Reward Ratio */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500 tracking-wider">
+                  Risk to Reward Ratio
+                </p>
+                <p className="text-3xl font-bold text-green-800 mt-1">
+                  {tradeStats.riskToRewardRatio || "N/A"}
+                </p>
+              </div>
+              {/* Average Profit/Loss */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500 tracking-wider">
+                  Average Profit/Loss
+                </p>
+                <p
+                  className={`text-3xl font-bold mt-1 ${
+                    tradeStats?.averageProfitLoss >= 0
+                      ? "text-green-800"
+                      : "text-red-800"
+                  }`}
+                >
+                  $ {tradeStats?.averageProfitLoss?.toFixed(2) || "N/A"}
+                </p>
+              </div>{" "}
+              {/* Max Drawdown */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500 tracking-wider">
+                  Max Drawdown
+                </p>
+                <p
+                  className={`text-3xl font-bold mt-1 ${
+                    tradeStats?.drawDownRatio >= 0
+                      ? "text-red-800"
+                      : "text-green-800"
+                  }`}
+                >
+                  {tradeStats?.drawDownRatio
+                    ? `${tradeStats.drawDownRatio}%`
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
             <MUIDataTable
               title={""}

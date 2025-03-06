@@ -5,6 +5,7 @@ import {
   getAllStrategiesByUser,
   getAssociatedTrades,
   getStrategyById,
+  getStrategyTradeStats,
   updateStrategyById,
 } from "../controller/strategy.controller";
 
@@ -27,5 +28,8 @@ router.put("/:id", updateStrategyById);
 
 // Delete a strategy by ID
 router.delete("/:id", deleteStrategyById);
+
+// Get strategy stats
+router.get("/strategy-stats/:userId/:id", getStrategyTradeStats);
 
 export default router;
