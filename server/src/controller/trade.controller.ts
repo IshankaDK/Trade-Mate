@@ -10,36 +10,14 @@ import User from "../models/User";
 // Create a Trade
 export const saveTrade = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>,
+  res: Response<StandardResponse<Trade>>
 ) => {
   try {
     let tradeData = req.body;
     tradeData.userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || "",
+      req.headers.authorization?.split(" ")[1] || ""
     ).id;
     // console.log("tradeData", tradeData);
-
-    const calculateProfit = (
-      entryPrice: number,
-      exitPrice: number,
-      positionSize: number,
-      status: string,
-      type: string,
-    ) => {
-      if (type === "buy") {
-        if (status === "win") {
-          return (exitPrice - entryPrice) * (positionSize / entryPrice);
-        } else {
-          return (exitPrice - entryPrice) * (positionSize / entryPrice);
-        }
-      } else {
-        if (status === "win") {
-          return (entryPrice - exitPrice) * (positionSize / entryPrice);
-        } else {
-          return (exitPrice - entryPrice) * (positionSize / entryPrice);
-        }
-      }
-    };
 
     tradeData = {
       ...tradeData,
@@ -48,7 +26,7 @@ export const saveTrade = async (
         tradeData.exitPrice,
         tradeData.positionSize,
         tradeData.status,
-        tradeData.type,
+        tradeData.type
       ),
     };
 
@@ -70,7 +48,7 @@ export const saveTrade = async (
 // Get all Trades by User
 export const getAllTradesByUser = async (
   req: Request,
-  res: Response<StandardResponse<Trade[]>>,
+  res: Response<StandardResponse<Trade[]>>
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -116,7 +94,7 @@ export const getAllTradesByUser = async (
 // Get a Trade by ID
 export const getTradeById = async (
   req: Request,
-  res: Response<StandardResponse<Trade>>,
+  res: Response<StandardResponse<Trade>>
 ) => {
   try {
     const { id } = req.params;
@@ -154,7 +132,7 @@ export const getTradeById = async (
 // Delete a Trade by ID
 export const deleteTradeById = async (
   req: Request,
-  res: Response<StandardResponse<null>>,
+  res: Response<StandardResponse<null>>
 ) => {
   try {
     // console.log("Method deleteTradeById called");
@@ -193,13 +171,13 @@ export const updateTrade = async (
     {},
     Partial<Trade>
   >,
-  res: Response<StandardResponse<Trade>>,
+  res: Response<StandardResponse<Trade>>
 ) => {
   try {
     // console.log("Method updateTrade called");
     const tradeId = req.params.id; // Trade ID from route parameters
     const userId = getClaimsFromToken(
-      req.headers.authorization?.split(" ")[1] || "",
+      req.headers.authorization?.split(" ")[1] || ""
     ).id; // Extract the user ID from the token
 
     // Find the existing trade
@@ -239,23 +217,6 @@ export const updateTrade = async (
     } = req.body;
 
     // Recalculate profit if necessary
-    const calculateProfit = (
-      entryPrice: number,
-      exitPrice: number,
-      positionSize: number,
-      status: string,
-      type: string,
-    ) => {
-      if (type === "buy") {
-        return status === "win"
-          ? (exitPrice - entryPrice) * (positionSize / entryPrice)
-          : (exitPrice - entryPrice) * (positionSize / entryPrice);
-      } else {
-        return status === "win"
-          ? (entryPrice - exitPrice) * (positionSize / entryPrice)
-          : (exitPrice - entryPrice) * (positionSize / entryPrice);
-      }
-    };
 
     const updatedProfit =
       entryPrice && exitPrice && positionSize && status && type
@@ -366,7 +327,7 @@ const getTotalStrategyCount = async (userId: number): Promise<number> => {
 
 // Helper method to get the most profitable strategy
 const getProfitableStrategy = async (
-  userId: number,
+  userId: number
 ): Promise<{ strategyId: number; totalProfit: number } | null> => {
   try {
     const trades = await Trade.findAll({
@@ -557,7 +518,7 @@ const getDrawDownRatio = async (userId: number) => {
           Sequelize.fn(
             "COALESCE",
             Sequelize.fn("SUM", Sequelize.col("profit")),
-            0,
+            0
           ),
           "totalProfitBeforeLoss",
         ],
@@ -749,7 +710,7 @@ const getProfitLoss = async (userId: number) => {
 // Endpoint to get User's Trade Statistics
 export const getUserTradeStats = async (
   req: Request,
-  res: Response<StandardResponse<any>>,
+  res: Response<StandardResponse<any>>
 ) => {
   try {
     // console.log("Method getUserTradeStats called");
@@ -845,7 +806,7 @@ const getEquityCurve = async (userId: number, initialBalance: number) => {
 
 const getMonthlyEquityCurve = async (
   userId: number,
-  initialBalance: number,
+  initialBalance: number
 ) => {
   const equityCurve = await getEquityCurve(userId, initialBalance);
 
@@ -877,7 +838,7 @@ const getMonthlyEquityCurve = async (
 // Endpoint to get User's Monthly Equity Curve
 export const getUserEquityCurve = async (
   req: Request,
-  res: Response<StandardResponse<any>>,
+  res: Response<StandardResponse<any>>
 ) => {
   try {
     const token: string = req.headers.authorization?.split(" ")[1] || "";
@@ -894,7 +855,7 @@ export const getUserEquityCurve = async (
 
     const monthlyEquityCurve = await getMonthlyEquityCurve(
       userId,
-      initialBalance || 0,
+      initialBalance || 0
     );
 
     if (monthlyEquityCurve?.length === 0) {
@@ -916,5 +877,27 @@ export const getUserEquityCurve = async (
       message: "Internal server error.",
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+};
+
+const calculateProfit = (
+  entryPrice: number,
+  exitPrice: number,
+  positionSize: number,
+  status: string,
+  type: string
+) => {
+  if (type === "buy") {
+    return status === "win"
+      ? (exitPrice - entryPrice) * (positionSize / entryPrice)
+      : status === "loss"
+        ? (exitPrice - entryPrice) * (positionSize / entryPrice)
+        : 0;
+  } else {
+    return status === "win"
+      ? (entryPrice - exitPrice) * (positionSize / entryPrice)
+      : status === "loss"
+        ? (entryPrice - exitPrice) * (positionSize / entryPrice)
+        : 0;
   }
 };
