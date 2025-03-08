@@ -9,6 +9,8 @@ import { Trade } from "../../types/TradeDto";
 const JournalView = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [tradesList, setTradesList] = useState<TradeTableData[]>([]);
+  const [isOverThreeTrades, setIsOverThreeTrades] = useState<boolean>(false);
+  const [isRevengeTrading, setIsRevengeTrading] = useState<boolean>(false);
 
   useEffect(() => {
     getAllTradesByUser();
@@ -39,6 +41,51 @@ const JournalView = () => {
     setData(newData);
   };
 
+  const findIfMoreThanThreeTradesForToday = () => {
+    const today = new Date();
+    let count = 0;
+    tradesList.forEach((trade) => {
+      const tradeDate = new Date(trade.openDate);
+      if (
+        tradeDate.getDate() === today.getDate() &&
+        tradeDate.getMonth() === today.getMonth() &&
+        tradeDate.getFullYear() === today.getFullYear()
+      ) {
+        count++;
+      }
+    });
+    if (count > 3) {
+      return true;
+    }
+    return false;
+  };
+
+  const findIfRevengeTrading = () => {
+    const today = new Date();
+    let count = 0;
+    tradesList.forEach((trade) => {
+      const tradeDate = new Date(trade.openDate);
+      if (
+        tradeDate.getDate() === today.getDate() &&
+        tradeDate.getMonth() === today.getMonth() &&
+        tradeDate.getFullYear() === today.getFullYear() &&
+        trade.profit < 0
+      ) {
+        count++;
+      }
+    });
+
+    if (count > 3) {
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    setIsOverThreeTrades(findIfMoreThanThreeTradesForToday());
+    setIsRevengeTrading(findIfRevengeTrading());
+  }, [tradesList]);
+
   return (
     <div className="min-h-screen py-[1vw]">
       <div className="flex items-center justify-between bg-gray-50 p-[1.5vw] rounded-lg shadow-sm">
@@ -49,6 +96,7 @@ const JournalView = () => {
             your trading skills.
           </p>
         </div>
+
         <Button
           variant="contained"
           onClick={() => {
@@ -59,6 +107,34 @@ const JournalView = () => {
           New Trade
         </Button>
       </div>
+
+      {isOverThreeTrades && (
+        <div
+          className="mt-2 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong className="font-bold">Warning!</strong>
+          <br />
+          <span className="block sm:inline">
+            Over Trade Detected - You have made more than 3 trades today.
+          </span>
+        </div>
+      )}
+
+      {isRevengeTrading && (
+        <div
+          className="mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong className="font-bold">Warning!</strong>
+          <br />
+          <span className="block sm:inline">
+            Revenge Trading Detected - You have made more than 3 losing trades
+            today.
+          </span>
+        </div>
+      )}
+
       <div className="mt-2">
         <TradeJournalTable
           tradeData={tradesList}
