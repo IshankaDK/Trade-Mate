@@ -321,6 +321,8 @@ const TradeJournalTable = ({
             search: true,
             pagination: true,
             elevation: 2,
+            rowsPerPage: 20,
+            rowsPerPageOptions: [20, 50, 100],
           }}
         />
       </div>

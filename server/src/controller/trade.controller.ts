@@ -739,6 +739,8 @@ export const getUserTradeStats = async (
     const tradeDuration = await getTradeDuration(userId);
     const profitLoss = await getProfitLoss(userId);
 
+    const totalAlertsThisMonth = await getAlertCount(userId);
+
     const data = {
       totalTrades: generalStats.totalTrades,
       winTrades: generalStats.winTrades,
@@ -758,6 +760,7 @@ export const getUserTradeStats = async (
       winLossRatio,
       tradeDuration,
       profitLoss,
+      totalAlertsThisMonth,
     };
 
     return res.status(200).json({
@@ -901,4 +904,120 @@ const calculateProfit = (
         ? (entryPrice - exitPrice) * (positionSize / entryPrice)
         : 0;
   }
+};
+
+const getAlertCount = async (userId: number) => {
+  const fomo = await getNumberOfFOMOTrades(userId);
+  const overTradeDays = await getThisMonthOverTradeDays(userId);
+  const revengeTradeDays = await getThisMonthRevengeTradeDays(userId);
+
+  return {
+    fomo,
+    overTradeDays,
+    revengeTradeDays,
+  };
+};
+
+const getNumberOfFOMOTrades = async (userId: number) => {
+  const startOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0
+  );
+
+  const trades = await Trade.findAll({
+    where: {
+      userId,
+      strategyId: null,
+      openDate: {
+        [Op.gte]: startOfMonth,
+        [Op.lte]: endOfMonth,
+      },
+    },
+  });
+
+  return trades.length;
+};
+
+const getThisMonthOverTradeDays = async (userId: number) => {
+  const startOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0
+  );
+
+  const trades = await Trade.findAll({
+    where: {
+      userId,
+      openDate: {
+        [Op.gte]: startOfMonth,
+        [Op.lte]: endOfMonth,
+      },
+    },
+  });
+
+  const tradeDays: Record<string, number> = {};
+
+  trades.forEach((trade) => {
+    const tradeDate = new Date(trade.openDate).toISOString().slice(0, 10); // Format to YYYY-MM-DD
+    if (!tradeDays[tradeDate]) {
+      tradeDays[tradeDate] = 0;
+    }
+    tradeDays[tradeDate]++;
+  });
+
+  const overTradeDays = Object.values(tradeDays).filter((count) => count > 3);
+
+  return overTradeDays.length;
+};
+
+const getThisMonthRevengeTradeDays = async (userId: number) => {
+  const startOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0
+  );
+
+  const trades = await Trade.findAll({
+    where: {
+      userId,
+      openDate: {
+        [Op.gte]: startOfMonth,
+        [Op.lte]: endOfMonth,
+      },
+    },
+  });
+
+  const tradeDays: Record<string, number> = {};
+
+  trades.forEach((trade) => {
+    const tradeDate = new Date(trade.openDate).toISOString().slice(0, 10); // Format to YYYY-MM-DD
+    if (!tradeDays[tradeDate]) {
+      tradeDays[tradeDate] = 0;
+    }
+    if (trade.status === "loss") {
+      tradeDays[tradeDate]++;
+    }
+  });
+
+  const revengeTradeDays = Object.values(tradeDays).filter(
+    (count) => count > 3
+  );
+
+  return revengeTradeDays.length;
 };

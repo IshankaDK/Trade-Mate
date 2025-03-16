@@ -86,8 +86,6 @@ const JournalView = () => {
 
   const findIfFOMOTrade = () => {
     const isFomoFound = tradesList.some((trade) => {
-      console.log("trade", trade);
-
       const tradeDate = new Date(trade.openDate);
       const today = new Date();
       if (
@@ -137,7 +135,7 @@ const JournalView = () => {
           role="alert"
         >
           <strong className="font-bold">
-            Over Trading Alert: You're entering more trades than usual.You've
+            Over Trading Alert: You're entering more trades than usual. You've
             made {tradeCountToday} trades today. Are you following your trading
             plan?
           </strong>

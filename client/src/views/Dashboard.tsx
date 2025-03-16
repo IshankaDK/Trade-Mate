@@ -59,6 +59,11 @@ interface StatProps {
   mostProfitableStrategy: any;
   riskToRewardRatio: any;
   drawDownRatio: any;
+  totalAlertsThisMonth: {
+    fomo: number;
+    overTradeDays: number;
+    revengeTradeDays: number;
+  };
 }
 
 interface EquityData {
@@ -455,6 +460,34 @@ export const Dashboard = () => {
                   ? `${((stats?.averageHoldingPeriod ?? 0) / 24 / 60).toFixed(1)} Days`
                   : `${stats?.averageHoldingPeriod} Minutes`}
               </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-800">
+                  This Month's
+                </h3>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-500">Revenge Trading Days</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats?.totalAlertsThisMonth?.revengeTradeDays || 0}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-500">FOMO Trades</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats?.totalAlertsThisMonth?.fomo || 0}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-500">Over Trading Days</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats?.totalAlertsThisMonth?.overTradeDays || 0}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
