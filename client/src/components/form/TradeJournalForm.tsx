@@ -158,7 +158,7 @@ const TradeJournalForm = ({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        },
+        }
       );
       toast.success("Trade updated successfully.");
       clearForm();
@@ -169,7 +169,7 @@ const TradeJournalForm = ({
   };
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setTrade((prev) => ({
@@ -218,13 +218,13 @@ const TradeJournalForm = ({
   const showDurationValue = (durationInMs: number) => {
     const days = Math.floor(durationInMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      (durationInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
     );
     const minutes = Math.floor((durationInMs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((durationInMs % (1000 * 60)) / 1000);
 
     setDuration(
-      `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
+      `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
     );
   };
 
@@ -291,10 +291,10 @@ const TradeJournalForm = ({
       return false;
     }
 
-    if (!trade.strategyId) {
-      toast.error("Trading Strategy is required.");
-      return false;
-    }
+    // if (!trade.strategyId) {
+    //   toast.error("Trading Strategy is required.");
+    //   return false;
+    // }
 
     if (!trade.positionSize || trade.positionSize <= 0) {
       toast.error("Position Size must be a positive number.");
@@ -554,7 +554,7 @@ const TradeJournalForm = ({
                 label="Trading Strategy"
                 select
                 fullWidth
-                required
+                // required
                 size="small"
                 value={trade.strategyId || ""}
                 onChange={setStrategyId}

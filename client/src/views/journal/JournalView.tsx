@@ -11,6 +11,8 @@ const JournalView = () => {
   const [tradesList, setTradesList] = useState<TradeTableData[]>([]);
   const [isOverThreeTrades, setIsOverThreeTrades] = useState<boolean>(false);
   const [isRevengeTrading, setIsRevengeTrading] = useState<boolean>(false);
+  const [tradeCountToday, setTradeCountToday] = useState<number>(0);
+  const [isThereFOMOTrade, setIsThereFOMOTrade] = useState<boolean>(false);
 
   useEffect(() => {
     getAllTradesByUser();
@@ -54,6 +56,7 @@ const JournalView = () => {
         count++;
       }
     });
+    setTradeCountToday(count);
     if (count > 3) {
       return true;
     }
@@ -81,9 +84,29 @@ const JournalView = () => {
     return false;
   };
 
+  const findIfFOMOTrade = () => {
+    const isFomoFound = tradesList.some((trade) => {
+      console.log("trade", trade);
+
+      const tradeDate = new Date(trade.openDate);
+      const today = new Date();
+      if (
+        tradeDate.getDate() === today.getDate() &&
+        tradeDate.getMonth() === today.getMonth() &&
+        tradeDate.getFullYear() === today.getFullYear() &&
+        trade.strategyId === null
+      ) {
+        return true;
+      }
+      return false;
+    });
+    setIsThereFOMOTrade(isFomoFound);
+  };
+
   useEffect(() => {
     setIsOverThreeTrades(findIfMoreThanThreeTradesForToday());
     setIsRevengeTrading(findIfRevengeTrading());
+    findIfFOMOTrade();
   }, [tradesList]);
 
   return (
@@ -113,10 +136,15 @@ const JournalView = () => {
           className="mt-2 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
           role="alert"
         >
-          <strong className="font-bold">Warning!</strong>
+          <strong className="font-bold">
+            Over Trading Alert: You're entering more trades than usual.You've
+            made {tradeCountToday} trades today. Are you following your trading
+            plan?
+          </strong>
           <br />
           <span className="block sm:inline">
-            Over Trade Detected - You have made more than 3 trades today.
+            Over Trading can diminish your focus and lead to impulsive
+            decisions. Review your trades and stick to your planned strategy.
           </span>
         </div>
       )}
@@ -126,11 +154,33 @@ const JournalView = () => {
           className="mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
           role="alert"
         >
-          <strong className="font-bold">Warning!</strong>
+          <strong className="font-bold">
+            Revenge Trading Warning : You're approaching a trade after a 3
+            loses.
+          </strong>
           <br />
           <span className="block sm:inline">
-            Revenge Trading Detected - You have made more than 3 losing trades
-            today.
+            Trading immediately after a loss may be influenced by revenge
+            trading. Take a moment to assess if this trade aligns with your
+            strategy.
+          </span>
+        </div>
+      )}
+
+      {isThereFOMOTrade && (
+        <div
+          className="mt-2 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative"
+          role="info"
+        >
+          <strong className="font-bold">
+            Reminder: FOMO can lead to impulsive decisions. You made a trade
+            without a strategy today.
+          </strong>
+          <br />
+          <span className="block sm:inline">
+            FOMO often leads to over trading. Ensure this trade aligns with your
+            strategy and not your emotions.Chasing the market often leads to
+            regretful decisions. Pause and review your plan before proceeding.
           </span>
         </div>
       )}

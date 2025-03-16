@@ -162,7 +162,7 @@ const TradeJournalTable = ({
         filterOptions: {
           names: tradeData
             .map(
-              (trade) => trade.currencyPair.from + "/" + trade.currencyPair.to,
+              (trade) => trade.currencyPair.from + "/" + trade.currencyPair.to
             )
             .filter((value, index, self) => self.indexOf(value) === index),
           logic: (value: any, filterVal: any) => {
@@ -195,7 +195,7 @@ const TradeJournalTable = ({
         filter: true,
         customBodyRender: (value: any) => (
           <Chip
-            label={value.name}
+            label={value?.name || "No Strategy"}
             style={{
               borderRadius: "0.5rem",
               fontWeight: "bold",
@@ -205,10 +205,10 @@ const TradeJournalTable = ({
         filterType: "dropdown",
         filterOptions: {
           names: tradeData
-            .map((trade) => trade.strategy.name)
+            .map((trade) => trade.strategy?.name)
             .filter((value, index, self) => self.indexOf(value) === index),
           logic: (value: any, filterVal: any) => {
-            return value.name !== filterVal[0];
+            return value?.name !== filterVal[0];
           },
         },
       },

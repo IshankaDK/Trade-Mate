@@ -63,7 +63,7 @@ Trade.init(
     },
     strategyId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true, // Allow null values
       references: {
         model: "strategies",
         key: "id",
@@ -140,7 +140,7 @@ Trade.init(
     modelName: "Trade",
     tableName: "trades",
     timestamps: true,
-  },
+  }
 );
 
 export default Trade;

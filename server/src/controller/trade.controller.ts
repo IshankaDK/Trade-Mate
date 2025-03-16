@@ -21,6 +21,7 @@ export const saveTrade = async (
 
     tradeData = {
       ...tradeData,
+      strategyId: tradeData.strategyId || null,
       profit: calculateProfit(
         tradeData.entryPrice,
         tradeData.exitPrice,

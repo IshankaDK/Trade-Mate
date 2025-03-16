@@ -29,7 +29,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
+  Filler
 );
 
 interface TradeData {
@@ -402,7 +402,7 @@ export const Dashboard = () => {
                 </div>
                 <div className="space-y-2">
                   <p className="text-lg font-bold text-gray-800">
-                    {stats.mostProfitableStrategy.strategy.name}
+                    {stats.mostProfitableStrategy.strategy?.name}
                   </p>
                   <p className="text-2xl font-bold text-green-600">
                     ${stats.mostProfitableStrategy.totalProfit.toFixed(2)}
