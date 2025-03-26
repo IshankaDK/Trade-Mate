@@ -853,6 +853,7 @@ const getMonthlyEquityCurve = async (
 
   return monthlyEquityCurve;
 };
+
 const getDailyEquityCurve = async (userId: number, initialBalance: number) => {
   const equityCurve = await getEquityCurve(userId, initialBalance);
 
@@ -865,10 +866,18 @@ const getDailyEquityCurve = async (userId: number, initialBalance: number) => {
     const date = new Date(point.date);
     const dayKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-    if (!dailyEquity[dayKey]) {
-      dailyEquity[dayKey] = point.equity;
-    } else {
-      dailyEquity[dayKey] = point.equity;
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    if (
+      date.getMonth() === currentMonth &&
+      date.getFullYear() === currentYear
+    ) {
+      if (!dailyEquity[dayKey]) {
+        dailyEquity[dayKey] = point.equity;
+      } else {
+        dailyEquity[dayKey] = point.equity;
+      }
     }
   });
 
