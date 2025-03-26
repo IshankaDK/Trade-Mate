@@ -7,7 +7,7 @@ import {
   Slider,
   TextField,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Trash } from "lucide-react";
 
 export const RiskManagementView: React.FC = () => {
@@ -15,6 +15,9 @@ export const RiskManagementView: React.FC = () => {
   const [riskPercentage, setRiskPercentage] = useState<number>(2);
   const [stopLoss, setStopLoss] = useState<number>(50);
   const [newGuideline, setNewGuideline] = useState<string>("");
+  const [takeProfit, setTakeProfit] = useState<number>(0);
+  const [rrRatio, setRRRatio] = useState<number>(0);
+  const [optimalTakeProfit, setOptimalTakeProfit] = useState<number>(0);
 
   const [guideLinesList, setGuideLinesList] = useState([
     {
@@ -65,6 +68,16 @@ export const RiskManagementView: React.FC = () => {
 
   const maxRisk = (accountSize * riskPercentage) / 100;
   const suggestedPositionSize = maxRisk / stopLoss;
+
+  // get suggested take profit
+  useEffect(() => {
+    const takeProfitValue = stopLoss * rrRatio;
+    setOptimalTakeProfit(takeProfitValue);
+  }, [stopLoss, rrRatio]);
+
+  useEffect(() => {
+    setAccountSize(Number(localStorage.getItem("currentBalance")) || 10000);
+  }, []);
 
   return (
     <div className="min-h-screen py-[1vw]">
@@ -194,18 +207,32 @@ export const RiskManagementView: React.FC = () => {
           </div>
           <div className="px-6 py-4">
             <div className="space-y-4 flex flex-col justify-between">
-              <div>
+              {/* <div>
                 <h1 className="text-sm font-medium text-gray-500">
                   Target Profit
                 </h1>
-                <Input className="mt-1 w-full" />
-              </div>
+                <Input
+                  className="mt-1 w-full"
+                  type="number"
+                  value={takeProfit}
+                  onChange={(e) => setTakeProfit(Number(e.target.value))}
+                />
+              </div> */}
               <div>
                 <h1 className="text-sm font-medium text-gray-500">
                   Risk-Reward Ratio
                 </h1>
-                <Slider min={0} max={5} step={0.1} className="mt-2" />
-                <span className="text-sm text-gray-600">1</span>
+                <Slider
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  className="mt-2"
+                  onChange={(_, value) => setRRRatio(value as number)}
+                />
+
+                <span className="text-sm text-gray-600">
+                  1:{rrRatio.toFixed(1)}
+                </span>
               </div>
 
               <div className="mt-4 p-4 bg-blue-50 rounded-lg">
@@ -215,7 +242,7 @@ export const RiskManagementView: React.FC = () => {
                 <p className="text-sm">
                   Recommended take-profit level:{" "}
                   <span className="font-bold text-blue-600">
-                    {maxRisk.toFixed(2)}
+                    {optimalTakeProfit.toFixed(2)}
                   </span>
                 </p>
               </div>
