@@ -323,6 +323,34 @@ const TradeJournalTable = ({
             elevation: 2,
             rowsPerPage: 20,
             rowsPerPageOptions: [20, 50, 100],
+            downloadOptions: { filename: "trade_journal.csv" },
+            onDownload(buildHead, buildBody, columns, data) {
+              // Filter out the last column (e.g., "option")
+              const filteredColumns = columns.slice(0, -1); // Exclude the last column
+              const transformedData = data.map((row) => {
+                const rowData = [...row.data]; // Ensure rowData is an array
+
+                // Format the currencyPair field as "USD/LKR"
+                if (rowData[4] && rowData[4].from && rowData[4].to) {
+                  rowData[4] = `${rowData[4].from}/${rowData[4].to}`;
+                }
+
+                // Format the strategy field
+                if (rowData[8] && rowData[8].name) {
+                  rowData[8] = rowData[8].name;
+                } else if (rowData[8] === null) {
+                  rowData[8] = "No Strategy";
+                }
+
+                // Remove the last column's data
+                rowData.pop();
+
+                return { data: rowData }; // Ensure the structure matches what buildBody expects
+              });
+
+              // Use the filtered columns and transformed data to build the CSV
+              return `${buildHead(filteredColumns)}${buildBody(transformedData)}`.trim();
+            },
           }}
         />
       </div>
