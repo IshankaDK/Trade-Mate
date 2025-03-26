@@ -10,7 +10,7 @@ import APIClient from "../../../util/APIClient.ts";
 export const ManageStrategyView: React.FC = () => {
   const [strategiesList, setStrategiesList] = useState<StrategyDto[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<StrategyDto | null>(
-    null,
+    null
   );
   const [openModal, setOpenModal] = useState(false);
 
@@ -53,7 +53,9 @@ export const ManageStrategyView: React.FC = () => {
     <div className="min-h-screen py-[1vw]">
       <div className="flex items-center justify-between bg-gray-50 p-[1.5vw] rounded-lg shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Playbook Records</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Strategy Playbook Records
+          </h1>
           <p className="text-gray-600 mt-[0.5vw]">
             Explore and choose from our curated strategies designed for all
             experience levels.
