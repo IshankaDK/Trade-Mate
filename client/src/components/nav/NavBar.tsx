@@ -29,9 +29,11 @@ export const NavBar = () => {
       <div className=" mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-[4.5rem]">
         {/* Logo */}
         <div className="flex items-center">
-          <span className="text-2xl font-bold text-blue-500 tracking-wide">
-            Trade Mate
-          </span>
+          <Link to="/dashboard">
+            <span className="text-2xl font-bold text-blue-500 tracking-wide">
+              Trade Mate
+            </span>
+          </Link>
         </div>
 
         {/* Navigation Links */}
@@ -55,7 +57,7 @@ export const NavBar = () => {
             className="flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-gray-200 hover:text-gray-800"
           >
             <Settings className="h-5 w-5" />
-            <span>Playbook</span>
+            <span>Strategy Playbook</span>
           </Link>
         </div>
 
