@@ -14,7 +14,14 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { BarChart, Info, Star, TrendingUp } from "lucide-react";
+import {
+  BarChart,
+  DollarSign,
+  Info,
+  Star,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import APIClient from "../util/APIClient";
 import { UserDto } from "../types/UserDto.ts";
@@ -47,6 +54,7 @@ interface StatProps {
   totalTrades: number;
   winTrades: number;
   lossTrades: number;
+  breakevenTrades: number;
   totalProfit: number;
   totalStrategyCount: number;
   monthlyProfits: MonthlyProfits[];
@@ -64,6 +72,7 @@ interface StatProps {
     overTradeDays: number;
     revengeTradeDays: number;
   };
+  currentBalance: number;
 }
 
 interface EquityData {
@@ -118,6 +127,23 @@ export const Dashboard = () => {
     y: data.equity,
   }));
 
+  const [isDaily, setIsDaily] = useState(true); // To toggle between daily and monthly
+
+  useEffect(() => {
+    APIClient.get(
+      `/trades/users/trade-stats/equity/${isDaily ? "daily" : "monthly"}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    ).then((response) => {
+      // console.log(response.data.data);
+      setEquityData(response.data.data);
+    });
+  }, [isDaily]);
+
   useEffect(() => {
     APIClient.get("/trades/users/trade-stats", {
       headers: {
@@ -127,16 +153,10 @@ export const Dashboard = () => {
     }).then((response) => {
       // console.log(response.data.data);
       setStats(response.data.data);
-    });
-
-    APIClient.get("/trades/users/trade-stats/equity", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((response) => {
-      // console.log(response.data.data);
-      setEquityData(response.data.data);
+      localStorage.setItem(
+        "currentBalance",
+        response.data.data.currentBalance || 0
+      );
     });
   }, []);
 
@@ -165,6 +185,7 @@ export const Dashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
+        display: false,
         position: "top",
         labels: {
           font: { size: 14 },
@@ -201,12 +222,16 @@ export const Dashboard = () => {
   const [wlData, setWlData] = useState<any>();
   useEffect(() => {
     const donutData = {
-      labels: ["Wins", "Losses"],
+      labels: ["Wins", "Losses", "Breakeven"],
       datasets: [
         {
-          data: [stats?.winTrades || 0, stats?.lossTrades || 0], // Sample win/loss data
-          backgroundColor: ["#3b82f6", "#FF6384"],
-          hoverBackgroundColor: ["#3b82f6", "#FF6384"],
+          data: [
+            stats?.winTrades || 0,
+            stats?.lossTrades || 0,
+            stats?.breakevenTrades || 0,
+          ],
+          backgroundColor: ["#3b82f6", "#FF6384", "#FFCE56"],
+          hoverBackgroundColor: ["#3b82f6", "#FF6384", "#FFCE56"],
         },
       ],
     };
@@ -246,12 +271,32 @@ export const Dashboard = () => {
               Analyze your trading performance and stay on top of your goals.
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex items-center space-x-4">
             <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-500 rounded-full p-2">
-                  <TrendingUp className="w-6 h-6 text-white" />
+                <div className="rounded-full p-2 bg-blue-500">
+                  <DollarSign className="w-6 h-6 text-white" />
                 </div>
+                <div>
+                  <p className="text-sm text-gray-600">Current Balance</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    ${Number(stats?.currentBalance)?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div
+                  className={`rounded-full p-2 ${Number(stats?.totalProfit) > 0 ? "bg-blue-500" : "bg-red-500"}`}
+                >
+                  {Number(stats?.totalProfit) > 0 ? (
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  ) : (
+                    <TrendingDown className="w-6 h-6 text-white" />
+                  )}
+                </div>
+
                 <div>
                   <p className="text-sm text-gray-600">Total Profit</p>
                   <p className="text-xl font-bold text-gray-800">
@@ -314,7 +359,7 @@ export const Dashboard = () => {
                   <h3 className="text-2xl font-bold text-gray-800">
                     ${Number(stats?.dailyPL)?.toFixed(2) || "0.00"}
                   </h3>
-                  <span className="text-xs text-gray-500">Last 10 trades</span>
+                  {/* <span className="text-xs text-gray-500">Last 10 trades</span> */}
                 </div>
               </div>
               <div className="bg-purple-100 rounded-full p-3">
@@ -350,7 +395,26 @@ export const Dashboard = () => {
                   Equity Curve
                 </h2>
                 <div className="flex items-center space-x-2">
-                  {/*<span className="text-sm text-gray-500">Last 30 days</span>*/}
+                  <button
+                    onClick={() => setIsDaily(true)}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isDaily
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Daily
+                  </button>
+                  <button
+                    onClick={() => setIsDaily(false)}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      !isDaily
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Monthly
+                  </button>
                 </div>
               </div>
               <div className="h-[400px]">

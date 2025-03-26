@@ -24,6 +24,6 @@ router.put("/:id", updateTrade);
 
 // stats
 router.get("/users/trade-stats", getUserTradeStats);
-router.get("/users/trade-stats/equity", getUserEquityCurve);
+router.get("/users/trade-stats/equity/:period", getUserEquityCurve);
 
 export default router;

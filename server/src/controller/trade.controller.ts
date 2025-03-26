@@ -270,6 +270,9 @@ const calculateGeneralStats = (trades: Trade[]) => {
   const totalTrades = trades.length;
   const winTrades = trades.filter((trade) => trade.status === "win").length;
   const lossTrades = trades.filter((trade) => trade.status === "loss").length;
+  const breakEvenTrades = trades.filter(
+    (trade) => trade.status === "breakeven"
+  ).length;
 
   const totalProfit = trades.reduce((sum, trade) => {
     const profit = trade.profit;
@@ -282,6 +285,7 @@ const calculateGeneralStats = (trades: Trade[]) => {
     totalTrades,
     winTrades,
     lossTrades,
+    breakEvenTrades,
     winRate,
     totalProfit,
   };
@@ -741,10 +745,20 @@ export const getUserTradeStats = async (
 
     const totalAlertsThisMonth = await getAlertCount(userId);
 
+    const user = await User.findOne({
+      where: { id: userId },
+      attributes: ["initial_capital"],
+    });
+
+    const initialBalance = user?.initial_capital || 0;
+
+    const currentBalance = initialBalance + generalStats.totalProfit;
+
     const data = {
       totalTrades: generalStats.totalTrades,
       winTrades: generalStats.winTrades,
       lossTrades: generalStats.lossTrades,
+      breakevenTrades: generalStats.breakEvenTrades,
       winRate: generalStats.winRate.toFixed(2),
       totalProfit: generalStats.totalProfit.toFixed(2),
       totalStrategyCount,
@@ -761,6 +775,7 @@ export const getUserTradeStats = async (
       tradeDuration,
       profitLoss,
       totalAlertsThisMonth,
+      currentBalance,
     };
 
     return res.status(200).json({
@@ -838,6 +853,33 @@ const getMonthlyEquityCurve = async (
 
   return monthlyEquityCurve;
 };
+const getDailyEquityCurve = async (userId: number, initialBalance: number) => {
+  const equityCurve = await getEquityCurve(userId, initialBalance);
+
+  if (!equityCurve || equityCurve.length === 0) return [];
+
+  // Group equity by day
+  const dailyEquity: { [key: string]: number } = {};
+
+  equityCurve.forEach((point) => {
+    const date = new Date(point.date);
+    const dayKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+    if (!dailyEquity[dayKey]) {
+      dailyEquity[dayKey] = point.equity;
+    } else {
+      dailyEquity[dayKey] = point.equity;
+    }
+  });
+
+  // Convert to array of objects
+  const dailyEquityCurve = Object.keys(dailyEquity).map((day) => ({
+    date: day,
+    equity: dailyEquity[day],
+  }));
+
+  return dailyEquityCurve;
+};
 
 // Endpoint to get User's Monthly Equity Curve
 export const getUserEquityCurve = async (
@@ -848,6 +890,7 @@ export const getUserEquityCurve = async (
     const token: string = req.headers.authorization?.split(" ")[1] || "";
     const claims = getClaimsFromToken(token);
     const userId = claims.id;
+    const period = req.params.period;
 
     const user = await User.findOne({
       where: { id: userId },
@@ -857,10 +900,10 @@ export const getUserEquityCurve = async (
 
     const initialBalance = user?.initial_capital; // Example initial balance of $10,000
 
-    const monthlyEquityCurve = await getMonthlyEquityCurve(
-      userId,
-      initialBalance || 0
-    );
+    const monthlyEquityCurve =
+      period === "daily"
+        ? await getDailyEquityCurve(userId, initialBalance || 0)
+        : await getMonthlyEquityCurve(userId, initialBalance || 0);
 
     if (monthlyEquityCurve?.length === 0) {
       return res.status(404).json({
